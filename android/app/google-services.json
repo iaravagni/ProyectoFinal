@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "210083539856",
+    "project_id": "proyectofinal-39dae",
+    "storage_bucket": "proyectofinal-39dae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:210083539856:android:8365233aac76782cd5a115",
+        "android_client_info": {
+          "package_name": "com.android.application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "210083539856-80t95b24c5gjm0a4nu2v9rttuhgev3b0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeLXQx93Rug-IW7umPgFEmRhZlQb85H-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "210083539856-80t95b24c5gjm0a4nu2v9rttuhgev3b0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:210083539856:android:4e08c9475091fe80d5a115",
+        "android_client_info": {
+          "package_name": "iarovich.com.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "210083539856-80t95b24c5gjm0a4nu2v9rttuhgev3b0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeLXQx93Rug-IW7umPgFEmRhZlQb85H-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "210083539856-80t95b24c5gjm0a4nu2v9rttuhgev3b0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

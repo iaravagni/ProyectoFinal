@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'profile_page.dart';
 import 'record_page.dart';
 import 'report_page.dart';
 import 'history_page.dart';
 
-void main() => runApp(MaterialApp(
-  home: MyApp(),
-));
-
-class MyApp extends StatefulWidget{
+class Navigation extends StatefulWidget {
   @override
-  _MyAppCardState createState() => _MyAppCardState();
+  State<Navigation> createState() => _NavigationState();
 }
 
-class _MyAppCardState extends State<MyApp>{
+class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
   PageController pageController = PageController();
 
@@ -52,5 +49,6 @@ class _MyAppCardState extends State<MyApp>{
         ],
       ),
       );
+
   }
 }

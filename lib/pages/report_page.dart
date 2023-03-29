@@ -226,7 +226,7 @@ class _ReportState extends State<Report> {
                       const SizedBox(height: 100.0),
 
                       Text(
-                        'RISK LEVEL',
+                        'LABOR RISK LEVEL',
                         style: TextStyle(
                             color: Colors.grey[700],
                             letterSpacing: 2.0,
