@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 bool newUser = false;
+// bool corrioGoogle = false;
 
 Future<bool> getDoc(user) async{
   var a = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
@@ -44,25 +45,33 @@ class GoogleSignInProvider extends ChangeNotifier{
 
 
       if (user != null){
-        var newUser = !await getDoc(user);
+        newUser = !await getDoc(user);
+        //corrioGoogle = true;
+        print('pag google');
+        print(newUser);
         if (newUser) {
+          result = true;
 
           await _firestore.collection('users').doc(user.uid).set(
               {
                 'username': user.displayName,
                 'uid': user.uid,
                 'profilePhoto': user.photoURL,
+
               }
           );
         }
       }
+      print('corrio google');
+      //print(corrioGoogle);
       return result;
     } catch (e) {
       print(e.toString());
     }
-
     notifyListeners();
   }
+
+
   Future logout() async {
     await googleSignIn.disconnect();
     FirebaseAuth.instance.signOut();
@@ -70,44 +79,3 @@ class GoogleSignInProvider extends ChangeNotifier{
 }
 
 
-
-// import 'package:flutter/material.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
-//
-// class GoogleSignInProvider extends ChangeNotifier{
-//   final googleSignIn = GoogleSignIn();
-//
-//   GoogleSignInAccount? _user;
-//
-//   GoogleSignInAccount get user => _user!;
-//
-//   Future googleLogin() async {
-//     try{
-//       final googleUser = await googleSignIn.signIn();
-//
-//       if (googleUser == null) return;
-//
-//       _user = googleUser;
-//
-//       final googleAuth = await googleUser.authentication;
-//
-//       final credential = GoogleAuthProvider.credential(
-//         accessToken: googleAuth.accessToken,
-//         idToken: googleAuth.idToken,
-//       );
-//
-//       await FirebaseAuth.instance.signInWithCredential(credential);
-//
-//       notifyListeners();
-//     } catch(e){
-//       print(e.toString());
-//     }
-//   }
-//
-//   Future logout() async{
-//     await googleSignIn.disconnect();
-//     FirebaseAuth.instance.signOut();
-//
-//   }
-// }
