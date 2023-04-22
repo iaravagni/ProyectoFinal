@@ -4,6 +4,13 @@ import 'profile_page.dart';
 import 'record_page.dart';
 import 'report_page.dart';
 import 'history_page.dart';
+import 'loading_page.dart';
+
+import 'package:myapp/Resources/user_info.dart';
+
+
+UserData actualUser = new UserData();
+
 
 class Navigation extends StatefulWidget {
   @override
@@ -20,8 +27,24 @@ class _NavigationState extends State<Navigation> {
     });
     pageController.jumpToPage(index);
   }
+
+
+
+  void initState(){
+    super.initState();
+    if (actualUser.name == ''){
+      userInfo().then(
+              (UserData s) => setState((){
+            actualUser = s;
+          }));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (actualUser.name == '') {
+      return Loading();
+    } else {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -50,5 +73,7 @@ class _NavigationState extends State<Navigation> {
       ),
       );
 
+
+    }
   }
 }

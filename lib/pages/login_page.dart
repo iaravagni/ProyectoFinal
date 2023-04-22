@@ -3,10 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:myapp/pages/google_sign_in_page.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'loading_page.dart';
 import 'navigation_page.dart';
 import 'registration_page.dart';
+
+
+bool response = false;
 
 class SignUpWidget extends StatelessWidget {
   @override
@@ -22,7 +26,6 @@ class SignUpWidget extends StatelessWidget {
           label: Text('Sign Up with Google account'),
           onPressed: (){
             final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-
             provider.googleLogin();
           },
         ),
@@ -31,27 +34,42 @@ class SignUpWidget extends StatelessWidget {
     );
 }
 
-
 class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.purple[100],
       body: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
+        // initialData: numUsers,
         builder: (context, snapshot) {
           print('hola');
-          print(newUser);
-          //newUser = true;
+
           if (snapshot.connectionState == ConnectionState.waiting){
             //return Center(child: CircularProgressIndicator());
+            print('Loading...');
             return Center(child: Loading());
-          } else if (snapshot.hasData && newUser) {
-            return Registration1();
-          } else if (snapshot.hasData){
+          } else if (snapshot.hasData) {
+
+            // print('tengo usuario');
+            // final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
+            // provider.googleLogin().then((value) {
+            //   print('response 1');
+            //   response=value;
+            //   print(response);
+            // });
+            // print('response 2');
+            // print(response);
+            // if(response) {
+            //     print('registration');
+            //     return Registration1();
+            // }else{
+            print('navigation');
             return Navigation();
           } else if (snapshot.hasError){
+            print('error');
             return const Center(child: Text('Something went wrong!'),);
           } else {
+            print('signup');
             return SignUpWidget();
           }
         }

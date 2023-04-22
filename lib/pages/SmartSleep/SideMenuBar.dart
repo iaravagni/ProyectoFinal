@@ -44,7 +44,7 @@ class _NavigatorDrawer extends State<NavigatorDrawer>{
             leading: const Icon (Icons.home_outlined),
             title: const Text('Home'),
             onTap: (){
-              Navigator.push(context,MaterialPageRoute(builder: (context) =>  MainPage(),
+              Navigator.push(context,MaterialPageRoute(builder: (context) =>  MainPage2(),
               ));
             },
           ),

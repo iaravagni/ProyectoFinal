@@ -7,10 +7,12 @@ class Loading extends StatelessWidget{
     return Container(
       color: Colors.purple[100],
       child: Center(
-        child: SpinKitThreeBounce(
-          color: Colors.white,
-          size: 50.0,
-        )
+        child: const SingleChildScrollView(
+          child: SpinKitThreeBounce(
+            color: Colors.white,
+            size: 50.0,
+          ),
+        ),
       ),
     );
   }

@@ -11,12 +11,12 @@ import '../bluetooth/SelectBondedDevicePage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
-class MainPage extends StatefulWidget {
+class MainPage2 extends StatefulWidget {
   @override
-  _MainPage createState() => new _MainPage();
+  _MainPage2 createState() => new _MainPage2();
 }
 
-class _MainPage extends State<MainPage> {
+class _MainPage2 extends State<MainPage2> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;    //definimos el estado inicial como unknown
 
   String _address = "...";
