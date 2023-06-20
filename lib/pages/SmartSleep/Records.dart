@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import './read%20data/get_user_name.dart';
+import '../read%20data/get_user_name.dart';
 
 class Records extends StatefulWidget {
   const Records({Key? key}) : super(key: key);

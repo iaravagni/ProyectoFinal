@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'BackgroundCollectedPage.dart';
 import '../bluetooth/BackgroundCollectingTask.dart';
 import 'package:scoped_model/scoped_model.dart';
-import '../Reports.dart';
-import '../Records.dart';
+import 'Reports.dart';
+import 'Records.dart';
 import 'MainPage.dart';
 
 class NavigatorDrawer extends StatefulWidget {

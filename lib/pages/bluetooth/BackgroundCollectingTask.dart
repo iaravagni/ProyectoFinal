@@ -15,7 +15,6 @@ class DataSample{
 
   final DateTime timestamp;
 
-
   const DataSample({
     required this.eje_x,
     required this.eje_y,
@@ -60,8 +59,10 @@ class BackgroundCollectingTask extends Model {
 
   BackgroundCollectingTask._fromConnection(this._connection) {
     _connection.input!.listen((data) { //aca lee lo que le manda el arduino
+      //print(data);
+
       _buffer += data;
-      log('data: $data');
+      //log('data: $data');
       //int len = data.length;
       //log('longitud: $len');
 
@@ -69,7 +70,8 @@ class BackgroundCollectingTask extends Model {
         // If there is a sample, and it is full sent
         int index = _buffer.indexOf('a'.codeUnitAt(0));
         if (index >= 0 && _buffer.length - index >= 11) {
-
+          print('Adentro IF');
+          print(_buffer);
           final DataSample sample = DataSample(
               eje_x: ((_buffer[index + 1] + _buffer[index + 2] )/2 ),
               eje_y: ((_buffer[index + 3] + _buffer[index + 4]) /2),
@@ -79,9 +81,10 @@ class BackgroundCollectingTask extends Model {
 
               timestamp: DateTime.now());
 
-          writeData(sample);
+          // writeData(sample);
           _buffer.removeRange(0, index + 11);
           samples.add(sample);
+          //print(samples);
 
           notifyListeners(); // Note: It shouldn't be invoked    very often - in this example data comes at every second, but if there would be more data, it should update (including repaint of graphs) in some fixed interval instead of after every sample.
           //print("${sample.timestamp.toString()} -> ${sample.temperature1} / ${sample.temperature2}");
@@ -99,7 +102,7 @@ class BackgroundCollectingTask extends Model {
 
   static Future<BackgroundCollectingTask> connect(
       BluetoothDevice server) async {
-    final BluetoothConnection connection =
+        final BluetoothConnection connection =
         await BluetoothConnection.toAddress(server.address);
     return BackgroundCollectingTask._fromConnection(connection);
   }
@@ -153,9 +156,7 @@ class BackgroundCollectingTask extends Model {
     return samples.getRange(i, samples.length);
   }
 
-  Future<void> writeData(DataSample sample) async{
-    _db.collection("datos_crudos").add(sample.toJson());
-    print("holu");
-
-  }
+  // Future<void> writeData(DataSample sample) async{
+  //   _db.collection("datos_crudos").add(sample.toJson());
+  // }
 }

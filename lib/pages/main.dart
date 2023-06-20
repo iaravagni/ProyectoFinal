@@ -4,6 +4,7 @@ import 'package:myapp/pages/google_sign_in_page.dart';
 import 'package:provider/provider.dart';
 
 import 'main_page.dart';
+import 'navigation_page.dart';
 
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import '../Resources/my_clipper.dart';
-
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:csv/csv.dart';
+import 'dart:io';
 
-import 'SmartSleep/BackgroundCollectedPage.dart';
-import 'bluetooth/BackgroundCollectingTask.dart';
+import 'bluetooth/BackgroundCollectingTask2.dart';
 import 'bluetooth/SelectBondedDevicePage.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 
 class Record extends StatefulWidget {
   @override
@@ -20,6 +16,7 @@ class Record extends StatefulWidget {
 }
 
 class _Record extends State<Record> {
+
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;    //definimos el estado inicial como unknown
 
   String _address = "...";
@@ -32,19 +29,51 @@ class _Record extends State<Record> {
 
   //bool _autoAcceptPairingRequests = false;
 
-  bool botonConnect = false;
-  bool BotonStart = false;
-  bool BotonStart2 = false;
+  bool connectButton = true;
+  bool startButton = false;
+  bool stopButton = false;
+  bool downloadButton = false;
 
-  bool device = false;
+  //bool device = false;
   bool start = false;
-  bool stop = false;
-  bool collec = false;
+  //bool stop = false;
+  //bool collec = false;
 
   Timer? _timer;
   int _start = 40;
 
-  //late final BluetoothConnection _connection; //trackear la conexion del blu con el celular
+  double counter = 0;
+  bool isCounting = false;
+  late Timer timer;
+
+  void startCounter() {
+    setState(() {
+      counter = 0;
+      isCounting = true;
+    });
+
+    // Start the counter
+    timer = Timer.periodic(Duration(milliseconds: 10), (timer) {
+      setState(() {
+        counter += 0.01;
+      });
+    });
+  }
+
+  void stopCounter() {
+    setState(() {
+      isCounting = false;
+    });
+
+    // Stop the counter
+    timer.cancel();
+  }
+
+  String formatTime(double time) {
+    final minutes = time ~/ 60;
+    final seconds = (time % 60).toStringAsFixed(2);
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.padLeft(5, '0')}';
+  }
 
   @override
   void initState() {
@@ -179,10 +208,10 @@ class _Record extends State<Record> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.tune, size: 40.0,),
+                              Icon(Icons.add_link_rounded, size: 40.0,),
                               const SizedBox(height: 5.0),
-                              Text('Bluetooth'),
-                              Text('status')],
+                              Text('Pair new'),
+                              Text('device')],
                           )
                       ),
                       onPressed: () {
@@ -199,7 +228,7 @@ class _Record extends State<Record> {
                       child: Container(
                           height: 100.0,
                           width: 100.0,
-                          child:((_collectingTask?.inProgress ?? false)
+                          child:((connectButton == false)
                               ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.leak_remove, size: 40.0,),const SizedBox(height: 5.0),Text('Disconnect'), Text('device')])
                               : Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.leak_add, size: 40.0,),const SizedBox(height: 5.0),Text('Connect'), Text('device')])                              )
                       ),
@@ -208,15 +237,17 @@ class _Record extends State<Record> {
                         if (_bluetoothState.isEnabled == false){
                           showDialog(
                             context: context,
-                            builder: (context) => AlertDialog(
+                            builder: (context) => const AlertDialog(
                               title: Text('Aviso'),
-                              content: Text('No puede buscar dispositivos porque no tiene el bluetooth conectado.'),
+                              content: Text('Bluetooth must be on to connect a device.'),
                             ),
                           );
                         }
                         else{
-                          if (_collectingTask?.inProgress ?? false) {
+                          if (_collectingTask?.inProgress ?? false || connectButton == false) {
                             await _collectingTask!.cancel();
+                            stopButton = false;
+                            connectButton = true;
                             setState(() {
                               /* Update for `_collectingTask.inProgress` */
                             });
@@ -225,14 +256,15 @@ class _Record extends State<Record> {
                             await Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return SelectBondedDevicePage(
+                                  return const SelectBondedDevicePage(
                                       checkAvailability: false);
                                 },
                               ),
                             );
                             if (selectedDevice != null) {
                               await _startBackgroundTask(context, selectedDevice);
-                              BotonStart = true;
+                              startButton = true;
+                              connectButton = false;
                               setState(() {
                                 /* Update for `_collectingTask.inProgress` */
                               });
@@ -244,12 +276,7 @@ class _Record extends State<Record> {
                     ),
                   ],
                 ),
-
-
-
               ],),
-
-
           ),
 
           Expanded(
@@ -259,10 +286,23 @@ class _Record extends State<Record> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const SizedBox(height: 30.0),
+
+                  Text(
+                  formatTime(counter),
+                  style: TextStyle(
+                      color: Colors.grey[700],
+                      letterSpacing: 2.0,
+                      fontSize: 40.0),
+                  ),
+
+                  const SizedBox(height: 40.0),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
                             height: 100,
@@ -274,10 +314,13 @@ class _Record extends State<Record> {
                                     borderRadius: BorderRadius.circular(100),
                                   )),
                               child: Icon(Icons.play_arrow, size:40.0),
-                              onPressed:  (BotonStart != false) ? () async {
+                              onPressed:  (startButton == true) ? () async {
                                 await _startRecording();
-                                BotonStart2 = true;
-                                startTimer();
+                                startButton = false;
+                                stopButton = true;
+                                downloadButton = false;
+                                startCounter;
+                                // startTimer();
                                 setState(() {});
                               }:null,
                             ),),
@@ -310,11 +353,13 @@ class _Record extends State<Record> {
                                     borderRadius: BorderRadius.circular(100),
                                   )),
                               child: Icon(Icons.stop, size:40.0),
-                              onPressed: (BotonStart2 == true) ?  () async{
+                              onPressed: (stopButton == true) ?  () async{
+                                stopButton = false;
+                                startButton = true;
+                                downloadButton = true;
+                                stopCounter;
                                 await _stopRecording();
-                                fetchAlbum();
                                 initState();
-                                // final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
                               }:null,
                             ),
                           ),
@@ -336,26 +381,40 @@ class _Record extends State<Record> {
                     ],
                   ),
 
-                  const SizedBox(height: 40.0),
+                  const SizedBox(height: 30.0),
 
-                  // ElevatedButton(
-                  //     child: const Text('View realtime data',
-                  //       style: TextStyle(fontSize: 16.0),),
-                  //     style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
-                  //     onPressed:  /*( ( _start ==0 ? true:false ) &&*/ (BotonStart2 == true) ? (){
-                  //       Navigator.of(context).push(
-                  //         MaterialPageRoute(
-                  //           builder: (context) {
-                  //             return ScopedModel<BackgroundCollectingTask>(
-                  //               model: _collectingTask!,
-                  //               child: BackgroundCollectedPage(),
-                  //             );
-                  //           },
-                  //         ),
-                  //       );
-                  //     }
-                  //         : null
-                  // ),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple[100],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          )),
+                      child: Icon(Icons.download, size:40.0),
+                      onPressed: (downloadButton == true) ?  () async{
+                        await saveCSVFile(totalData);
+                        initState();
+                      }:null,
+                    ),
+                  ),
+
+                  //BOTONES DE PRUEBA QUE HAY QUE BORRAR
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: isCounting ? null : startCounter,
+                          child: Text('Start'),
+                        ),
+                        SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: isCounting ? stopCounter : null,
+                          child: Text('Stop'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -365,23 +424,24 @@ class _Record extends State<Record> {
     );
   }
 
-  void startTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-          (Timer timer) {
-        if (_start == 0) {
-          setState(() {
-            timer.cancel();
-          });
-        } else {
-          setState(() {
-            _start--;
-          });
-        }
-      },
-    );
-  }
+  // void startTimer() {
+  //   const oneSec = Duration(seconds: 1);
+  //   _timer = Timer.periodic(
+  //     oneSec,
+  //         (Timer timer) {
+  //       if (_start == 0) {
+  //         setState(() {
+  //           timer.cancel();
+  //         });
+  //       } else {
+  //         setState(() {
+  //           _start--;
+  //         });
+  //       }
+  //     },
+  //   );
+  //
+  // }
 
   Future<void> _startRecording() async {
     await _collectingTask?.start();
@@ -389,7 +449,21 @@ class _Record extends State<Record> {
 
   Future <void> _stopRecording() async {
     await _collectingTask!.cancel();
+    print('Recording stopped');
   }
+
+
+  Future<void> saveCSVFile(List<double> csvData) async {
+    final csvContent = csvData.map((value) => [value]).toList();
+
+    final Directory? directory = await getExternalStorageDirectory();
+    final file = File('${directory?.path}/${DateTime.now()} - Medicion EHG.csv');
+    await file.writeAsString(const ListToCsvConverter().convert(csvContent));
+
+    print('CSV file saved in the internal memory at: ${file.path}');
+  }
+
+
 
   Future<void> _startBackgroundTask(
       BuildContext context,
@@ -405,10 +479,10 @@ class _Record extends State<Record> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Error occured while connecting'),
-            content: Text("${ex.toString()}"),
+            content: Text(ex.toString()),
             actions: <Widget>[
-              new TextButton(
-                child: new Text("Close"),
+              TextButton(
+                child: Text("Close"),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -427,48 +501,5 @@ class _Record extends State<Record> {
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
     }
-  }
-
-  // Future<http.Response> fetchAlbum() async{
-  //   return http.get(Uri.parse('http://scerretini.pythonanywhere.com/'));
-  // }
-
-
-  // Future<http.Response> fetchAlbum() {
-  //   return http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));}
-
-  Future<Album> fetchAlbum() async {
-    final response = await http.get(Uri.parse('http://scerretini.pythonanywhere.com/'));
-
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return Album.fromJson(jsonDecode(response.body));
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load album');
-    }
-  }
-
-}
-
-class Album {
-  final int userId;
-  final int id;
-  final String title;
-
-  const Album({
-    required this.userId,
-    required this.id,
-    required this.title,
-  });
-
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      userId: json['userId'],
-      id: json['id'],
-      title: json['title'],
-    );
   }
 }

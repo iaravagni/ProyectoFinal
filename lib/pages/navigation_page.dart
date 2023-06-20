@@ -11,7 +11,6 @@ import 'package:myapp/Resources/user_info.dart';
 
 UserData actualUser = new UserData();
 
-
 class Navigation extends StatefulWidget {
   @override
   State<Navigation> createState() => _NavigationState();
@@ -21,7 +20,7 @@ class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
   PageController pageController = PageController();
 
-  void onTapped(int index){
+  void updateSelectedIndex(int index){
     setState(() {
       _selectedIndex = index;
     });
@@ -58,16 +57,14 @@ class _NavigationState extends State<Navigation> {
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History' )
         ],
         currentIndex: _selectedIndex,
-        onTap: onTapped
+        onTap: updateSelectedIndex
       ),
       body: PageView(
         controller: pageController,
         children: [
-          Profile(),
-          //Container(color: Colors.orange),
+          Profile(updateSelectedIndex),
           Record(),
           Report(),
-          //Container(color: Colors.black),
           History(),
         ],
       ),
