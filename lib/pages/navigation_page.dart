@@ -27,8 +27,6 @@ class _NavigationState extends State<Navigation> {
     pageController.jumpToPage(index);
   }
 
-
-
   void initState(){
     super.initState();
     if (actualUser.name == ''){
@@ -69,8 +67,6 @@ class _NavigationState extends State<Navigation> {
         ],
       ),
       );
-
-
     }
   }
 }

@@ -225,27 +225,27 @@ class _ReportState extends State<Report> {
                       ),
                       const SizedBox(height: 100.0),
 
-                      Text(
-                        'LABOR RISK LEVEL',
-                        style: TextStyle(
-                            color: Colors.grey[700],
-                            letterSpacing: 2.0,
-                            fontSize: 15.0
-                        ),
-                      ),
-
-                      const SizedBox(height: 20.0),
-
-                      LinearPercentIndicator(
-                        //width: MediaQuery.of(context).size.width - 50,
-                        animation: true,
-                        lineHeight: 20.0,
-                        animationDuration: 2500,
-                        percent: 0.8,
-                        center: Text("80.0%"),
-                        linearStrokeCap: LinearStrokeCap.roundAll,
-                        progressColor: Colors.orangeAccent,
-                      ),
+                      // Text(
+                      //   'LABOR RISK LEVEL',
+                      //   style: TextStyle(
+                      //       color: Colors.grey[700],
+                      //       letterSpacing: 2.0,
+                      //       fontSize: 15.0
+                      //   ),
+                      // ),
+                      //
+                      // const SizedBox(height: 20.0),
+                      //
+                      // LinearPercentIndicator(
+                      //   //width: MediaQuery.of(context).size.width - 50,
+                      //   animation: true,
+                      //   lineHeight: 20.0,
+                      //   animationDuration: 2500,
+                      //   percent: 0.8,
+                      //   center: Text("80.0%"),
+                      //   linearStrokeCap: LinearStrokeCap.roundAll,
+                      //   progressColor: Colors.orangeAccent,
+                      // ),
 
 
                     ],

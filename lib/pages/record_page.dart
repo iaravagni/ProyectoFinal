@@ -4,7 +4,10 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'dart:io';
+import 'package:provider/provider.dart';
 
+
+import 'timer_provider.dart';
 import 'bluetooth/BackgroundCollectingTask2.dart';
 import 'bluetooth/SelectBondedDevicePage.dart';
 
@@ -15,7 +18,8 @@ class Record extends StatefulWidget {
   _Record createState() => new _Record();
 }
 
-class _Record extends State<Record> {
+// class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
+class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;    //definimos el estado inicial como unknown
 
@@ -27,53 +31,15 @@ class _Record extends State<Record> {
 
   BackgroundCollectingTask? _collectingTask;
 
-  //bool _autoAcceptPairingRequests = false;
 
   bool connectButton = true;
   bool startButton = false;
   bool stopButton = false;
   bool downloadButton = false;
 
-  //bool device = false;
-  bool start = false;
-  //bool stop = false;
-  //bool collec = false;
+  bool showPainLevelInput = false;
+  double painLevel = 0; // Variable to store the pain level
 
-  Timer? _timer;
-  int _start = 40;
-
-  double counter = 0;
-  bool isCounting = false;
-  late Timer timer;
-
-  void startCounter() {
-    setState(() {
-      counter = 0;
-      isCounting = true;
-    });
-
-    // Start the counter
-    timer = Timer.periodic(Duration(milliseconds: 10), (timer) {
-      setState(() {
-        counter += 0.01;
-      });
-    });
-  }
-
-  void stopCounter() {
-    setState(() {
-      isCounting = false;
-    });
-
-    // Stop the counter
-    timer.cancel();
-  }
-
-  String formatTime(double time) {
-    final minutes = time ~/ 60;
-    final seconds = (time % 60).toStringAsFixed(2);
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.padLeft(5, '0')}';
-  }
 
   @override
   void initState() {
@@ -122,326 +88,487 @@ class _Record extends State<Record> {
     });
   }
 
+  void _showPainLevelDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Indicate Pain Level'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Slider(
+                value: painLevel,
+                min: 0,
+                max: 10,
+                divisions: 10,
+                onChanged: (double value) {
+                  setState(() {
+                    painLevel = value; // Update the painLevel variable
+                  });
+                },
+              ),
+              Text(
+                'Pain Level: ${painLevel.toStringAsFixed(1)}', // Display current value
+                style: TextStyle(fontSize: 16),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print('Selected pain level: $painLevel');
+                  Navigator.pop(context); // Close the dialog
+                },
+                child: Text('Submit'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     FlutterBluetoothSerial.instance.setPairingRequestHandler(null);
     _collectingTask?.dispose();
     _discoverableTimeoutTimer?.cancel();
-    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.purple[100],
-      body: SafeArea(
-        child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.all(35.0),
-            child: Column(
-              children: [
-                Center(
-                  child: Icon(
-                    Icons.bluetooth,
-                    color: Colors.white70,
-                    size: 50.0,),
-                ),
 
-                const SizedBox(height: 10.0),
-
-                Center(
-                  child: Text(
-                    'Bluetooth connection',
-                    style: TextStyle(
-                      color: Colors.white, //Colors.grey[900],
-                      letterSpacing: 2.0,
-                      fontSize: 30.0,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 50.0),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Enable Bluetooth',
-                      style: TextStyle(
-                          color: Colors.white ,//Colors.grey[900],
-                          letterSpacing: 2.0,
-                          fontSize: 17.0
-                      ),
-                    ),
-                    Switch(
-                      activeColor: Colors.white70,
-                      value: _bluetoothState.isEnabled, // This bool value toggles the switch.
-                      onChanged: (bool value) {
-                        // Do the request and update with the true value then
-                        future() async {
-                          // async lambda seems to not working
-                          if (value) {
-                            await FlutterBluetoothSerial.instance.requestEnable();
-                          } else {
-                            await FlutterBluetoothSerial.instance.requestDisable();
-                          }
-                        }
-
-                        future().then((_) {
-                          setState(() {});
-                        });
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 30.0),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add_link_rounded, size: 40.0,),
-                              const SizedBox(height: 5.0),
-                              Text('Pair new'),
-                              Text('device')],
-                          )
-                      ),
-                      onPressed: () {
-                        FlutterBluetoothSerial.instance.openSettings();
-                      },
-
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
-                    ),
-
-                    const SizedBox(width: 20.0),
-
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[50]),
-                      child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          child:((connectButton == false)
-                              ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.leak_remove, size: 40.0,),const SizedBox(height: 5.0),Text('Disconnect'), Text('device')])
-                              : Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.leak_add, size: 40.0,),const SizedBox(height: 5.0),Text('Connect'), Text('device')])                              )
-                      ),
-                      //inProgress = false
-                      onPressed: () async {
-                        if (_bluetoothState.isEnabled == false){
-                          showDialog(
-                            context: context,
-                            builder: (context) => const AlertDialog(
-                              title: Text('Aviso'),
-                              content: Text('Bluetooth must be on to connect a device.'),
-                            ),
-                          );
-                        }
-                        else{
-                          if (_collectingTask?.inProgress ?? false || connectButton == false) {
-                            await _collectingTask!.cancel();
-                            stopButton = false;
-                            connectButton = true;
-                            setState(() {
-                              /* Update for `_collectingTask.inProgress` */
-                            });
-                          } else {
-                            final BluetoothDevice? selectedDevice =
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const SelectBondedDevicePage(
-                                      checkAvailability: false);
-                                },
-                              ),
-                            );
-                            if (selectedDevice != null) {
-                              await _startBackgroundTask(context, selectedDevice);
-                              startButton = true;
-                              connectButton = false;
-                              setState(() {
-                                /* Update for `_collectingTask.inProgress` */
-                              });
-                              //_collectingTask?.inProgress = true;
-                            }
-                          }
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ],),
-          ),
-
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              alignment: Alignment.center,
+    return Consumer<TimerProvider>(
+        builder: (context, timerProvider, _)
+    {return Scaffold(
+        backgroundColor: Colors.purple[100],
+        body: SafeArea(
+          child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.all(35.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 30.0),
-
-                  Text(
-                  formatTime(counter),
-                  style: TextStyle(
-                      color: Colors.grey[700],
-                      letterSpacing: 2.0,
-                      fontSize: 40.0),
+                  const Center(
+                    child: Icon(
+                      Icons.bluetooth,
+                      color: Colors.white70,
+                      size: 50.0,),
                   ),
 
-                  const SizedBox(height: 40.0),
+                  const SizedBox(height: 10.0),
+
+                  const Center(
+                    child: Text(
+                      'Bluetooth connection',
+                      style: TextStyle(
+                          color: Colors.white, //Colors.grey[900],
+                          letterSpacing: 2.0,
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15.0),
 
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 100,
-                            width: 100,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple[100],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(100),
-                                  )),
-                              child: Icon(Icons.play_arrow, size:40.0),
-                              onPressed:  (startButton == true) ? () async {
-                                await _startRecording();
-                                startButton = false;
-                                stopButton = true;
-                                downloadButton = false;
-                                startCounter;
-                                // startTimer();
-                                setState(() {});
-                              }:null,
-                            ),),
+                      const Text('Enable Bluetooth',
+                        style: TextStyle(
+                            color: Colors.white, //Colors.grey[900],
+                            letterSpacing: 2.0,
+                            fontSize: 17.0
+                        ),
+                      ),
+                      Switch(
+                        activeColor: Colors.white70,
+                        value: _bluetoothState.isEnabled,
+                        // This bool value toggles the switch.
+                        onChanged: (bool value) {
+                          // Do the request and update with the true value then
+                          future() async {
+                            // async lambda seems to not working
+                            if (value) {
+                              await FlutterBluetoothSerial.instance
+                                  .requestEnable();
+                            } else {
+                              await FlutterBluetoothSerial.instance
+                                  .requestDisable();
+                            }
+                          }
 
-                          const SizedBox(height: 10.0),
-
-                          Text('START',
-                            style: TextStyle(
-                                color: Colors.grey[700],
-                                letterSpacing: 2.0,
-                                fontSize: 15.0),),
-                          Text('RECORDING',
-                            style: TextStyle(
-                                color: Colors.grey[700],
-                                letterSpacing: 2.0,
-                                fontSize: 15.0),),
-                        ],),
-
-                      const SizedBox(width: 60.0),
-
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 100,
-                            width: 100,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple[100],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(100),
-                                  )),
-                              child: Icon(Icons.stop, size:40.0),
-                              onPressed: (stopButton == true) ?  () async{
-                                stopButton = false;
-                                startButton = true;
-                                downloadButton = true;
-                                stopCounter;
-                                await _stopRecording();
-                                initState();
-                              }:null,
-                            ),
-                          ),
-
-                          const SizedBox(height: 10.0),
-
-                          Text('STOP',
-                            style: TextStyle(
-                                color: Colors.grey[700],
-                                letterSpacing: 2.0,
-                                fontSize: 15.0),),
-                          Text('RECORDING',
-                            style: TextStyle(
-                                color: Colors.grey[700],
-                                letterSpacing: 2.0,
-                                fontSize: 15.0),),
-
-                        ],),
+                          future().then((_) {
+                            setState(() {});
+                          });
+                        },
+                      ),
                     ],
                   ),
 
                   const SizedBox(height: 30.0),
 
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple[100],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100),
-                          )),
-                      child: Icon(Icons.download, size:40.0),
-                      onPressed: (downloadButton == true) ?  () async{
-                        await saveCSVFile(totalData);
-                        initState();
-                      }:null,
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple[50]),
+                    child: Container(
+                        height: 100.0,
+                        width: 100.0,
+                        child: ((connectButton == false)
+                            ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.leak_remove, size: 40.0,),
+                              SizedBox(height: 5.0),
+                              Text('Disconnect'),
+                              Text('device')
+                            ])
+                            : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.leak_add, size: 40.0,),
+                              SizedBox(height: 5.0),
+                              Text('Connect'),
+                              Text('device')
+                            ]))
                     ),
+                    onPressed: () async {
+                      if (_bluetoothState.isEnabled == false) {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                          const AlertDialog(
+                            title: Text('Aviso'),
+                            content: Text(
+                                'Bluetooth must be on to connect a device.'),
+                          ),
+                        );
+                      }
+                      else {
+                        // if (_collectingTask?.inProgress ??
+                        //     false || connectButton == false) {
+                        if (connectButton == false) {
+                          await _collectingTask!.disconnect();
+                          startButton = false;
+                          stopButton = false;
+                          connectButton = true;
+                          timerProvider.stop();
+                          timerProvider.reset();
+                          setState(() {
+                            /* Update for `_collectingTask.inProgress` */
+                          });
+                        } else {
+                          final BluetoothDevice? selectedDevice =
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const SelectBondedDevicePage(
+                                    checkAvailability: false);
+                              },
+                            ),
+                          );
+
+                          if (selectedDevice != null) {
+                            await _startBackgroundTask(context, selectedDevice);
+                            startButton = true;
+                            connectButton = false;
+                            setState(() {
+                              /* Update for `_collectingTask.inProgress` */
+                            });
+                            //_collectingTask?.inProgress = true;
+                          }
+                        }
+                      }
+                    },
                   ),
 
-                  //BOTONES DE PRUEBA QUE HAY QUE BORRAR
-                  Center(
-                    child: Row(
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     ElevatedButton(
+                  //       child: Container(
+                  //           height: 100.0,
+                  //           width: 100.0,
+                  //           child: Column(
+                  //             mainAxisAlignment: MainAxisAlignment.center,
+                  //             children: [
+                  //               Icon(Icons.add_link_rounded, size: 40.0,),
+                  //               const SizedBox(height: 5.0),
+                  //               Text('Pair new'),
+                  //               Text('device')],
+                  //           )
+                  //       ),
+                  //       onPressed: () {
+                  //         FlutterBluetoothSerial.instance.openSettings();
+                  //       },
+                  //
+                  //       style: ElevatedButton.styleFrom(
+                  //           backgroundColor: Colors.purple[50]),
+                  //     ),
+                  //
+                  //     const SizedBox(width: 20.0),
+                  //
+                  //     ElevatedButton(
+                  //       style: ElevatedButton.styleFrom(
+                  //           backgroundColor: Colors.purple[50]),
+                  //       child: Container(
+                  //           height: 100.0,
+                  //           width: 100.0,
+                  //           child: ((connectButton == false)
+                  //               ? Column(
+                  //               mainAxisAlignment: MainAxisAlignment.center,
+                  //               children: [
+                  //                 Icon(Icons.leak_remove, size: 40.0,),
+                  //                 const SizedBox(height: 5.0),
+                  //                 Text('Disconnect'),
+                  //                 Text('device')
+                  //               ])
+                  //               : Column(
+                  //               mainAxisAlignment: MainAxisAlignment.center,
+                  //               children: [
+                  //                 Icon(Icons.leak_add, size: 40.0,),
+                  //                 const SizedBox(height: 5.0),
+                  //                 Text('Connect'),
+                  //                 Text('device')
+                  //               ]))
+                  //       ),
+                  //       //inProgress = false
+                  //       onPressed: () async {
+                  //         if (_bluetoothState.isEnabled == false) {
+                  //           showDialog(
+                  //             context: context,
+                  //             builder: (context) =>
+                  //             const AlertDialog(
+                  //               title: Text('Aviso'),
+                  //               content: Text(
+                  //                   'Bluetooth must be on to connect a device.'),
+                  //             ),
+                  //           );
+                  //         }
+                  //         else {
+                  //           if (_collectingTask?.inProgress ??
+                  //               false || connectButton == false) {
+                  //             await _collectingTask!.cancel();
+                  //             stopButton = false;
+                  //             connectButton = true;
+                  //             setState(() {
+                  //               /* Update for `_collectingTask.inProgress` */
+                  //             });
+                  //           } else {
+                  //             final BluetoothDevice? selectedDevice =
+                  //             await Navigator.of(context).push(
+                  //               MaterialPageRoute(
+                  //                 builder: (context) {
+                  //                   return const SelectBondedDevicePage(
+                  //                       checkAvailability: false);
+                  //                 },
+                  //               ),
+                  //             );
+                  //             if (selectedDevice != null) {
+                  //               await _startBackgroundTask(
+                  //                   context, selectedDevice);
+                  //               startButton = true;
+                  //               connectButton = false;
+                  //               setState(() {
+                  //                 /* Update for `_collectingTask.inProgress` */
+                  //               });
+                  //               //_collectingTask?.inProgress = true;
+                  //             }
+                  //           }
+                  //         }
+                  //       },
+                  //     ),
+                  //   ],
+                  // ),
+
+                  SizedBox(height: 20.0,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [((connectButton == false) ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check, size: 15.0, color: Colors.green),
+                          Text(' Device paired',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 1.5,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 15.0),),
+                        ])
+                        : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:  [
+                          Icon(Icons.close, size: 15.0,color: Colors.red),
+                          Text(' Device unpaired',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 1.5,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 15.0),),
+                        ]))
+                    ],),
+                ],),
+            ),
+
+            Expanded(
+              child: Container(
+                color: Colors.white,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+
+                    ElevatedButton(
+                      onPressed: () {
+                        _showPainLevelDialog(context); // Show the pain level dialog
+                      },
+                      child: Text('Indicate pain level'),
+                    ),
+
+                    const SizedBox(height: 10.0),
+
+                    Center(
+                    child: stopButton ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.fiber_manual_record,
+                            color: Colors.red,
+                            size: 15,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Recording...',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 1.5,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 15.0),
+                          ),
+                      ],) : Text('')
+                    ),
+
+                    SizedBox(height: 10),
+                    Text(
+                      timerProvider.formatTime(),
+                      style: TextStyle(
+                          color: Colors.grey[700],
+                          letterSpacing: 2.0,
+                          fontSize: 40.0),
+                    ),
+
+                    const SizedBox(height: 40.0),
+
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ElevatedButton(
-                          onPressed: isCounting ? null : startCounter,
-                          child: Text('Start'),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: isCounting ? stopCounter : null,
-                          child: Text('Stop'),
-                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 100,
+                              width: 100,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.purple[100],
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(100),
+                                    )),
+                                child: Icon(Icons.play_arrow, size: 40.0),
+                                onPressed: (startButton == true) ? () async {
+                                  await _startRecording();
+                                  startButton = false;
+                                  stopButton = true;
+                                  downloadButton = false;
+                                  timerProvider.start();
+                                  setState(() {});
+                                } : null,
+                              ),),
+
+                            const SizedBox(height: 10.0),
+
+                            Text('START',
+                              style: TextStyle(
+                                  color: Colors.grey[700],
+                                  letterSpacing: 2.0,
+                                  fontSize: 15.0),),
+                            Text('RECORDING',
+                              style: TextStyle(
+                                  color: Colors.grey[700],
+                                  letterSpacing: 2.0,
+                                  fontSize: 15.0),),
+                          ],),
+
+                        const SizedBox(width: 60.0),
+
+                        Column(
+                          children: [
+                            SizedBox(
+                              height: 100,
+                              width: 100,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.purple[100],
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(100),
+                                    )),
+                                child: Icon(Icons.stop, size: 40.0),
+                                onPressed: (stopButton == true) ? () async {
+                                  await _stopRecording();
+                                  stopButton = false;
+                                  startButton = true;
+                                  downloadButton = true;
+                                  timerProvider.stop();
+                                  //initState();
+                                  setState(() {});
+                                } : null,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10.0),
+
+                            Text('STOP',
+                              style: TextStyle(
+                                  color: Colors.grey[700],
+                                  letterSpacing: 2.0,
+                                  fontSize: 15.0),),
+                            Text('RECORDING',
+                              style: TextStyle(
+                                  color: Colors.grey[700],
+                                  letterSpacing: 2.0,
+                                  fontSize: 15.0),),
+
+                          ],),
                       ],
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 30.0),
+
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple[100],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            )),
+                        child: Icon(Icons.download, size: 40.0),
+                        onPressed: (downloadButton == true) ? () async {
+                          await saveCSVFile(totalData);
+                          initState();
+                        } : null,
+                      ),
+                    ),
+
+
+                  ],
+                ),
               ),
             ),
-          ),
-        ],),
-      ),
-    );
+          ],),
+        ),
+      );
+    });
   }
 
-  // void startTimer() {
-  //   const oneSec = Duration(seconds: 1);
-  //   _timer = Timer.periodic(
-  //     oneSec,
-  //         (Timer timer) {
-  //       if (_start == 0) {
-  //         setState(() {
-  //           timer.cancel();
-  //         });
-  //       } else {
-  //         setState(() {
-  //           _start--;
-  //         });
-  //       }
-  //     },
-  //   );
-  //
-  // }
 
   Future<void> _startRecording() async {
     await _collectingTask?.start();
@@ -453,17 +580,46 @@ class _Record extends State<Record> {
   }
 
 
+  // Future<void> saveCSVFile(List<double> csvData) async {
+  //   final csvContent = csvData.map((value) => [value]).toList();
+  //
+  //   final Directory? directory = await getExternalStorageDirectory();
+  //   final file = File('${directory?.path}/${DateTime.now()} - Medicion EHG.csv');
+  //   await file.writeAsString(const ListToCsvConverter().convert(csvContent));
+  //
+  //   print('CSV file saved in the internal memory at: ${file.path}');
+  // }
+
   Future<void> saveCSVFile(List<double> csvData) async {
-    final csvContent = csvData.map((value) => [value]).toList();
+    final int dataLength = csvData.length;
+
+    final List<double> emg1 = [];
+    final List<double> emg2 = [];
+
+    for (int i = 0; i < dataLength; i++) {
+      if (i % 2 == 0) {
+        emg1.add(csvData[i]);
+      } else {
+        emg2.add(csvData[i]);
+      }
+    }
+
+    final List<List<dynamic>> csvContent = [];
+    final int numRows = emg1.length > emg2.length ? emg1.length : emg2.length;
+
+    for (int i = 0; i < numRows; i++) {
+      final List<dynamic> row = [i < emg1.length ? emg1[i] : '', i < emg2.length ? emg2[i] : ''];
+      csvContent.add(row);
+    }
 
     final Directory? directory = await getExternalStorageDirectory();
-    final file = File('${directory?.path}/${DateTime.now()} - Medicion EHG.csv');
-    await file.writeAsString(const ListToCsvConverter().convert(csvContent));
+    final file = File('${directory?.path}/${DateTime.now()} - Split Medicion EHG.csv');
 
-    print('CSV file saved in the internal memory at: ${file.path}');
+    final csvFileContent = const ListToCsvConverter().convert(csvContent);
+    await file.writeAsString(csvFileContent);
+
+    print('CSV file with split data saved at: ${file.path}');
   }
-
-
 
   Future<void> _startBackgroundTask(
       BuildContext context,
@@ -502,4 +658,7 @@ class _Record extends State<Record> {
       await doc.reference.delete();
     }
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

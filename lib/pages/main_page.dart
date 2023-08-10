@@ -5,7 +5,6 @@ import 'package:myapp/pages/google_sign_in_page.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 import 'auth_page.dart';
 import 'loading_page.dart';
 import 'navigation_page.dart';

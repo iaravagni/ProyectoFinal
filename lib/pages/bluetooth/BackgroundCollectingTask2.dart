@@ -43,7 +43,9 @@ class BackgroundCollectingTask extends Model {
           packageStarted = false;
 
           // Process the complete package
-          if (packageData.length == 200) {
+          int bufferLength = 200;
+
+          if (packageData.length == bufferLength) {
             totalData.addAll(_processPackage(packageData));
             print('Total data: $totalData');  
             
@@ -88,6 +90,10 @@ class BackgroundCollectingTask extends Model {
     notifyListeners();
     _connection.output.add(ascii.encode('stop')); //esto hay que ponerlo en una funcion de un boton para que mande
     //await _connection.finish();
+  }
+
+  Future<void> disconnect()async{
+    await _connection.finish();
   }
 
   Future<void> pause() async {
