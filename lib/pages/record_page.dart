@@ -16,6 +16,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Record extends StatefulWidget {
   @override
   _Record createState() => new _Record();
+
 }
 
 // class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
@@ -36,10 +37,10 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
   bool startButton = false;
   bool stopButton = false;
   bool downloadButton = false;
+  bool newRecButton = true;
 
   bool showPainLevelInput = false;
-  double painLevel = 0; // Variable to store the pain level
-
+  int painLevel = 0; // Variable to store the pain level
 
   @override
   void initState() {
@@ -88,43 +89,75 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  void _showPainLevelDialog(BuildContext context) {
-    showDialog(
+  Future<void> showPainLevelDialog(BuildContext context) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Indicate Pain Level'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Slider(
-                value: painLevel,
-                min: 0,
-                max: 10,
-                divisions: 10,
-                onChanged: (double value) {
-                  setState(() {
-                    painLevel = value; // Update the painLevel variable
-                  });
-                },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(
+                'Indicate Pain Level',
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  letterSpacing: 1.5,
+                  fontSize: 20.0,
+                ),
               ),
-              Text(
-                'Pain Level: ${painLevel.toStringAsFixed(1)}', // Display current value
-                style: TextStyle(fontSize: 16),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Slider(
+                    value: painLevel.toDouble(),
+                    min: 0,
+                    max: 10,
+                    divisions: 10,
+                    onChanged: (double value) {
+                      setState(() {
+                        painLevel = value.round();
+                      });
+                    },
+                    activeColor: Color(0xFF4c405c),
+                    inactiveColor: Colors.grey[200],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'PAIN LEVEL: $painLevel',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      letterSpacing: 2.0,
+                      fontSize: 15.0,
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  print('Selected pain level: $painLevel');
-                  Navigator.pop(context); // Close the dialog
-                },
-                child: Text('Submit'),
-              ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      startButton = true;
+                      newRecButton = false;
+                      print('hola');
+                      Navigator.of(context).pop(true); // Close the dialog
+                    });
+                  },
+                  child: Text(
+                    'Submit',
+                    style: TextStyle(
+                      color: Color(0xFF4c405c),
+                      letterSpacing: 1.5,
+                      fontSize: 15.0,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
+
 
   @override
   void dispose() {
@@ -136,7 +169,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
-
+    super.build(context);
     return Consumer<TimerProvider>(
         builder: (context, timerProvider, _)
     {return Scaffold(
@@ -144,7 +177,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
         body: SafeArea(
           child: Column(children: [
             Padding(
-              padding: const EdgeInsets.all(35.0),
+              padding: const EdgeInsets.only(top: 35.0, bottom: 20.0, left: 35.0, right: 35.0),
               child: Column(
                 children: [
                   const Center(
@@ -248,6 +281,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                         //     false || connectButton == false) {
                         if (connectButton == false) {
                           await _collectingTask!.disconnect();
+                          newRecButton = false;
                           startButton = false;
                           stopButton = false;
                           connectButton = true;
@@ -269,7 +303,8 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
                           if (selectedDevice != null) {
                             await _startBackgroundTask(context, selectedDevice);
-                            startButton = true;
+                            newRecButton = true;
+                            //startButton = true;
                             connectButton = false;
                             setState(() {
                               /* Update for `_collectingTask.inProgress` */
@@ -417,14 +452,51 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
 
-                    ElevatedButton(
-                      onPressed: () {
-                        _showPainLevelDialog(context); // Show the pain level dialog
-                      },
-                      child: Text('Indicate pain level'),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     _showPainLevelDialog(context); // Show the pain level dialog
+                    //   },
+                    //   child: Text('Indicate pain level',
+                    //   style: TextStyle(
+                    //       color: Colors.white,
+                    //       fontSize: 18.0,
+                    //       letterSpacing: 1.0,
+                    //       fontWeight: FontWeight.bold
+                    //   ))
+                    //
+                    // ),
+
+                    const SizedBox(height: 20.0),
+
+                    TextButton(
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(20)),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                        ),
+                        backgroundColor: MaterialStateColor.resolveWith((states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey[300]!;
+                          }
+                          return const Color(0xFF4c405c);
+                        }),
+                      ),
+                      onPressed: (newRecButton == true) ? () async {
+                        await showPainLevelDialog(context);
+                        setState(() {});
+                      } : null,
+                      child: Text(
+                        'New recording',
+                        style: TextStyle(
+                          color: (newRecButton == true) ? Colors.white : Colors.grey[550], // Change the text color
+                          fontSize: 18.0,
+                          letterSpacing: 1.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
 
-                    const SizedBox(height: 10.0),
+                    SizedBox(height: 25),
 
                     Center(
                     child: stopButton ? Row(
@@ -448,15 +520,27 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     ),
 
                     SizedBox(height: 10),
-                    Text(
-                      timerProvider.formatTime(),
-                      style: TextStyle(
+
+                    // Text(
+                    //   timerProvider.formatTime(),
+                    //   style: TextStyle(
+                    //       color: Colors.grey[700],
+                    //       letterSpacing: 2.0,
+                    //       fontSize: 40.0),
+                    // ),
+
+                    if (startButton || stopButton) ...[
+                      Text(
+                        timerProvider.formatTime(),
+                        style: TextStyle(
                           color: Colors.grey[700],
                           letterSpacing: 2.0,
-                          fontSize: 40.0),
-                    ),
+                          fontSize: 40.0,
+                        ),
+                      ),
+                    ],
 
-                    const SizedBox(height: 40.0),
+                    const SizedBox(height: 30.0),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -514,7 +598,9 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                 child: Icon(Icons.stop, size: 40.0),
                                 onPressed: (stopButton == true) ? () async {
                                   await _stopRecording();
+                                  newRecButton = true;
                                   stopButton = false;
+                                  newRecButton = true;
                                   startButton = true;
                                   downloadButton = true;
                                   timerProvider.stop();
@@ -541,7 +627,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                       ],
                     ),
 
-                    const SizedBox(height: 30.0),
+                    const SizedBox(height: 10.0),
 
                     Center(
                       child: ElevatedButton(
@@ -552,7 +638,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                             )),
                         child: Icon(Icons.download, size: 40.0),
                         onPressed: (downloadButton == true) ? () async {
-                          await saveCSVFile(totalData);
+                          await saveCSVFile(totalData, painLevel);
                           initState();
                         } : null,
                       ),
@@ -590,36 +676,28 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
   //   print('CSV file saved in the internal memory at: ${file.path}');
   // }
 
-  Future<void> saveCSVFile(List<double> csvData) async {
-    final int dataLength = csvData.length;
-
-    final List<double> emg1 = [];
-    final List<double> emg2 = [];
-
-    for (int i = 0; i < dataLength; i++) {
-      if (i % 2 == 0) {
-        emg1.add(csvData[i]);
-      } else {
-        emg2.add(csvData[i]);
-      }
-    }
-
+  Future<void> saveCSVFile(List<double> csvData, int painLevel) async {
     final List<List<dynamic>> csvContent = [];
-    final int numRows = emg1.length > emg2.length ? emg1.length : emg2.length;
 
-    for (int i = 0; i < numRows; i++) {
-      final List<dynamic> row = [i < emg1.length ? emg1[i] : '', i < emg2.length ? emg2[i] : ''];
+    for (int i = 0; i < csvData.length; i += 2) {
+      final List<dynamic> row = [
+        painLevel,
+        csvData[i],
+        csvData[i + 1],
+
+      ];
       csvContent.add(row);
     }
 
     final Directory? directory = await getExternalStorageDirectory();
-    final file = File('${directory?.path}/${DateTime.now()} - Split Medicion EHG.csv');
+    final file = File('${directory?.path}/${DateTime.now()} - Medicion EHG.csv');
 
     final csvFileContent = const ListToCsvConverter().convert(csvContent);
     await file.writeAsString(csvFileContent);
 
-    print('CSV file with split data saved at: ${file.path}');
+    print('CSV file with data and pain level saved at: ${file.path}');
   }
+
 
   Future<void> _startBackgroundTask(
       BuildContext context,

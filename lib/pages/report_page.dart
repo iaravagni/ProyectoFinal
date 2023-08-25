@@ -9,6 +9,9 @@ class Report extends StatefulWidget{
 }
 
 class _ReportState extends State<Report> {
+
+  String numContractions = '5';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +112,7 @@ class _ReportState extends State<Report> {
                                 borderRadius: const BorderRadius.all(Radius.circular(20.0))),
                             child: Center(
                               child: Text(
-                                '-', //TODO: Change to variable user.pregnancies
+                                numContractions, //TODO: Change to variable user.pregnancies
                                 style: TextStyle(
                                     color: Colors.grey[900],
                                     letterSpacing: 2.0,

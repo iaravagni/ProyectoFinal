@@ -65,6 +65,12 @@ dev_dependencies:
   dropdown_button2: ^2.0.0
   path_provider: ^2.0.2
   csv: ^5.0.2
+  pdf: ^2.0.0 # For PDF generation
+  flutter_pdfview: ^1.0.3 # For displaying PDF in-app
+  url_launcher: ^6.1.0
+  #pdf: ^3.10.4
+  #flutter_pdfview: ^1.3.1
+  #url_launcher: ^6.1.12
 
 
 # For information on the generic Dart part of this file, see the
