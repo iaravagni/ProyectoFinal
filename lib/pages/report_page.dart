@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
-import '../Resources/my_clipper.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+//import 'package:flutter/services.dart';
+import 'dart:io';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'dart:typed_data';
+import 'package:flutter/services.dart' show rootBundle;
+import 'PDF/mobile.dart';
 
 class Report extends StatefulWidget{
 
@@ -10,7 +16,52 @@ class Report extends StatefulWidget{
 
 class _ReportState extends State<Report> {
 
-  String numContractions = '5';
+  bool downloadButton = true;
+
+  String patientName = 'John Doe';
+  String date = '2023-08-25';
+  String patientAge = '30';
+  String weeksPregnant = '25';
+  String durationValue = '30 seconds';
+  String frequencyValue = '5 minutes';
+  String intensityValue = 'High';
+  String numContractions = '10';
+  String measurementDuration = '20 seconds';
+
+  // PDF generation function
+  Future<void> _createPDF() async {
+    PdfDocument document = PdfDocument();
+    final page = document.pages.add();
+
+    const String title = 'Pregnancy Contractions Report';
+    final PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 14);
+
+    final Size pageSize = page.getClientSize();
+    final Size textSize = font.measureString(title);
+
+    final double x = (pageSize.width - textSize.width) / 2;
+    final double y = 50.0; // Adjust the Y-coordinate as needed
+    
+    page.graphics.drawImage(
+        PdfBitmap(await _readImageData('vaia_header.png')),
+        Rect.fromLTWH(0,100, 440, 550));
+
+    page.graphics.drawString(title, font, bounds: Rect.fromLTWH(x, y, textSize.width, textSize.height));
+
+
+    List<int> bytes = await document.save();
+    document.dispose();
+
+    saveAndLaunchFile(bytes, 'VAIA Report.pdf');
+
+  }
+
+  Future<Uint8List> _readImageData(String name) async {
+    final data = await rootBundle.load('assets/report/figures/$name');
+    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +76,8 @@ class _ReportState extends State<Report> {
                   Container(
                     color: Colors.purple[100],
                     child: Column(
-                        children: [
-                          const SizedBox(height: 55.0),
+                        children: const [
+                          SizedBox(height: 55.0),
                           Center(
                             child: Icon(
                               Icons.receipt_long_rounded,
@@ -35,7 +86,7 @@ class _ReportState extends State<Report> {
                           ),
 
 
-                      const SizedBox(height: 10.0),
+                      SizedBox(height: 10.0),
 
                       Center(
                         child: Text(
@@ -49,7 +100,7 @@ class _ReportState extends State<Report> {
                         ),
                       ),
 
-                      const SizedBox(height: 20.0),
+                      SizedBox(height: 20.0),
                       ],),),
 
                 const SizedBox(height: 70.0),
@@ -112,7 +163,7 @@ class _ReportState extends State<Report> {
                                 borderRadius: const BorderRadius.all(Radius.circular(20.0))),
                             child: Center(
                               child: Text(
-                                numContractions, //TODO: Change to variable user.pregnancies
+                                '-', //TODO: Change to variable user.pregnancies
                                 style: TextStyle(
                                     color: Colors.grey[900],
                                     letterSpacing: 2.0,
@@ -226,29 +277,54 @@ class _ReportState extends State<Report> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 100.0),
+                      const SizedBox(height: 60.0),
 
-                      // Text(
-                      //   'LABOR RISK LEVEL',
-                      //   style: TextStyle(
-                      //       color: Colors.grey[700],
-                      //       letterSpacing: 2.0,
-                      //       fontSize: 15.0
+                      // Center(
+                      //   child: ElevatedButton(
+                      //     style: ElevatedButton.styleFrom(
+                      //         backgroundColor: Colors.purple[100],
+                      //         shape: RoundedRectangleBorder(
+                      //           borderRadius: BorderRadius.circular(100),
+                      //         )),
+                      //     child: Icon(Icons.download, size: 40.0),
+                      //     onPressed: (downloadButton == true) ? () async {
+                      //       //await saveCSVFile(totalData, painLevel);
+                      //       initState();
+                      //     } : null,
                       //   ),
                       // ),
-                      //
-                      // const SizedBox(height: 20.0),
-                      //
-                      // LinearPercentIndicator(
-                      //   //width: MediaQuery.of(context).size.width - 50,
-                      //   animation: true,
-                      //   lineHeight: 20.0,
-                      //   animationDuration: 2500,
-                      //   percent: 0.8,
-                      //   center: Text("80.0%"),
-                      //   linearStrokeCap: LinearStrokeCap.roundAll,
-                      //   progressColor: Colors.orangeAccent,
-                      // ),
+
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 100,
+                          width: 100,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple[100],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                )),
+                            child: Icon(Icons.download_rounded, size: 40.0),
+                            onPressed: (downloadButton == true) ? () {
+                              _createPDF(); // Call the _createPDF function
+                            } : null,
+                          ),),
+
+                        const SizedBox(height: 10.0),
+
+                        Text('DOWNLOAD',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              letterSpacing: 2.0,
+                              fontSize: 15.0),),
+                        Text('REPORT',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              letterSpacing: 2.0,
+                              fontSize: 15.0),),
+                      ],),
 
 
                     ],
