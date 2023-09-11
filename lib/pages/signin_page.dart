@@ -89,7 +89,7 @@ class _LoginState extends State<Login> {
                   //Icon(Icons.pregnant_woman, size: 100,),
                   Image.asset(
                       'assets/logoVAIA_sinFondo.png',
-                      height: 230,),
+                      height: 250,),
                   //SizedBox(height: 5,),
                   Text(
                     'Hello again!',

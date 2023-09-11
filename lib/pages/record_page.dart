@@ -137,7 +137,6 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     setState(() {
                       startButton = true;
                       newRecButton = false;
-                      print('hola');
                       Navigator.of(context).pop(true); // Close the dialog
                     });
                   },
@@ -520,14 +519,6 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     ),
 
                     SizedBox(height: 10),
-
-                    // Text(
-                    //   timerProvider.formatTime(),
-                    //   style: TextStyle(
-                    //       color: Colors.grey[700],
-                    //       letterSpacing: 2.0,
-                    //       fontSize: 40.0),
-                    // ),
 
                     if (startButton || stopButton) ...[
                       Text(
