@@ -68,7 +68,7 @@ class _RegistrationState extends State<Registration> {
                 },
                 child: Text('OK'),
                 style: TextButton.styleFrom(
-                  primary: Colors.deepPurple, // Text Color
+                  foregroundColor: Colors.deepPurple, // Text Color
                 ),)
               ],
 
@@ -77,7 +77,7 @@ class _RegistrationState extends State<Registration> {
     }
   }
 
- Future uploadDatabase(user) async{
+  Future uploadDatabase(user) async{
    int timestamp = DateTime.now().millisecondsSinceEpoch;
 
    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -92,6 +92,7 @@ class _RegistrationState extends State<Registration> {
         'prevPreg': _previousPregController.text.trim(),
         'numChildren': _numChildrenController.text.trim(),
         'pregRisk': _riskController,
+        'reports': '0'
       });
   }
 

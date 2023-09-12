@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'profile_page.dart';
 import '../Resources/text_form.dart';
-import '../Resources/user_info.dart';
+
 import 'navigation_page.dart';
 
 class EditInfo extends StatefulWidget {

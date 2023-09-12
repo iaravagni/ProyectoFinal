@@ -11,6 +11,8 @@ import 'package:myapp/Resources/user_info.dart';
 
 UserData actualUser = new UserData();
 
+List<String> reportItems = [];
+
 class Navigation extends StatefulWidget {
   @override
   State<Navigation> createState() => _NavigationState();
@@ -32,8 +34,12 @@ class _NavigationState extends State<Navigation> {
     if (actualUser.name == ''){
       userInfo().then(
               (UserData s) => setState((){
-            actualUser = s;
+              actualUser = s;
           }));
+      getReportName(actualUser.uid).then(
+              (List<String> r) => setState((){
+              reportItems = r;
+              }));
     }
   }
 

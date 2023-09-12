@@ -9,6 +9,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'PDF/mobile.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+
+
+import 'navigation_page.dart';
 
 class Report extends StatefulWidget{
 
@@ -21,23 +26,41 @@ class _ReportState extends State<Report> {
   bool downloadButton = true;
   bool isGeneratingPDF = false; // Variable to track PDF generation state
 
-  String patientName = 'Jane Doe';
+  String patientName = '${actualUser.name} ${actualUser.surname}';
   String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  String patientAge = '30';
-  String weeksPregnant = '25';
-  String durationValue = '30 seconds';
-  String frequencyValue = '5 minutes';
-  String intensityValue = '5';
+  String patientAge = actualUser.age;
+  String weeksPregnant = actualUser.weeks;
+  String durationValue = '30 s';
+  String frequencyValue = '5 min';
+  String intensityValue = '5 mV';
   String numContractions = '10';
   String measurementDuration = '20 seconds';
+
+  Future updateReportsNum() async {
+
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    String reportsNum = (int.parse(actualUser.reports) + 1).toString();
+
+    actualUser.reports = reportsNum;
+
+    await _firestore.collection('users').doc(actualUser.uid).update(
+        {
+          'reports': reportsNum,
+        });
+  }
+
+  void updateReportItems(value){
+    reportItems.add(value);
+  }
+
 
   // PDF generation function
   Future<void> _createPDF() async {
     PdfDocument document = PdfDocument();
 
-
     final page1 = document.pages.add();
-    final font = PdfFontFamily.timesRoman;
+    const font = PdfFontFamily.timesRoman;
     final Size pageSize = page1.getClientSize();
 
     //Patient info header
@@ -66,7 +89,7 @@ class _ReportState extends State<Report> {
     final Size textSizeTitle = fontTitle.measureString(title);
 
     final double xTitle = (pageSize.width - textSizeTitle.width) / 2;
-    final double yTitle = 130.0;
+    const double yTitle = 130.0;
 
     // Subtitles
     const String subtitle1 = 'Contractions information';
@@ -84,10 +107,10 @@ class _ReportState extends State<Report> {
     gridContractions.columns.add(count: 1);
 
     PdfGridRow rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Duration: $durationValue';
+    rowC.cells[0].value = 'Duration: $durationValue''econds';
 
     rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Frequency: $frequencyValue';
+    rowC.cells[0].value = 'Frequency: $frequencyValue''utes';
 
     rowC = gridContractions.rows.add();
     rowC.cells[0].value = 'Intensity: $intensityValue';
@@ -190,7 +213,21 @@ class _ReportState extends State<Report> {
     List<int> bytes = await document.save();
     document.dispose();
 
-    saveAndLaunchFile(bytes, 'VAIA Report.pdf');
+    // Generate a unique PDF identifier based on the timestamp
+    final pdfIdentifier = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+    // Generate a unique PDF file name
+    final pdfFileName = '$pdfIdentifier VAIA report.pdf';
+
+    // Upload the PDF to Firebase Storage
+    await uploadPdfToFirebaseStorage(Uint8List.fromList(bytes), pdfFileName);
+
+    // Store PDF metadata in Firestore
+    await storePdfMetadata(pdfIdentifier);
+
+    updateReportItems(pdfIdentifier);
+
+    saveAndLaunchFile(bytes, pdfFileName);
 
   }
 
@@ -208,6 +245,46 @@ class _ReportState extends State<Report> {
 
     return grid;
   }
+
+  Future<void> uploadPdfToFirebaseStorage(Uint8List pdfBytes, String pdfFileID) async {
+    try {
+      final firebase_storage.Reference storageRef = firebase_storage
+          .FirebaseStorage.instance
+          .ref()
+          .child('reports') // Replace 'your-storage-folder' with your desired folder in Firebase Storage
+          .child(pdfFileID);
+
+      await storageRef.putData(pdfBytes);
+
+      print('PDF uploaded to Firebase Storage: $pdfFileID');
+    } catch (e) {
+      print('Error uploading PDF to Firebase Storage: $e');
+      // Handle the error as needed
+    }
+  }
+
+  Future<void> storePdfMetadata(String pdfIdentifier) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      final String userUID = actualUser.uid;
+      final String pdfFileName = '$pdfIdentifier.pdf';
+
+      // Store metadata about the PDF in the "reports" collection
+      await firestore.collection('reports').doc(pdfIdentifier).set({
+        'userUID': userUID,
+        'pdfIdentifier': pdfIdentifier,
+        'fileName': pdfFileName,
+        // Add other metadata as needed
+      });
+
+      print('PDF metadata stored in Firestore: $pdfIdentifier');
+    } catch (e) {
+      print('Error storing PDF metadata in Firestore: $e');
+      // Handle the error as needed
+    }
+  }
+
 
 
 
@@ -311,7 +388,7 @@ class _ReportState extends State<Report> {
                                 borderRadius: const BorderRadius.all(Radius.circular(20.0))),
                             child: Center(
                               child: Text(
-                                '-', //TODO: Change to variable user.pregnancies
+                                numContractions,
                                 style: TextStyle(
                                     color: Colors.grey[900],
                                     letterSpacing: 2.0,
@@ -328,7 +405,7 @@ class _ReportState extends State<Report> {
                                 borderRadius: const BorderRadius.all(Radius.circular(20.0))),
                             child: Center(
                               child: Text(
-                                '-', //TODO: Change to variable user.children
+                                durationValue,
                                 style: TextStyle(
                                     color: Colors.grey[900],
                                     letterSpacing: 2.0,
@@ -397,7 +474,7 @@ class _ReportState extends State<Report> {
                                 borderRadius: const BorderRadius.all(Radius.circular(20.0))),
                             child: Center(
                               child: Text(
-                                '-', //TODO: Change to variable user.risk
+                                frequencyValue,
                                 style: TextStyle(
                                     color: Colors.grey[900],
                                     letterSpacing: 2.0,
@@ -414,7 +491,7 @@ class _ReportState extends State<Report> {
                                 borderRadius: const BorderRadius.all(Radius.circular(20.0))),
                             child: Center(
                               child: Text(
-                                '-', //TODO: Change to variable user.reports
+                                intensityValue,
                                 style: TextStyle(
                                     color: Colors.grey[900],
                                     letterSpacing: 2.0,
@@ -448,17 +525,6 @@ class _ReportState extends State<Report> {
                         SizedBox(
                           height: 100,
                           width: 100,
-                          // child: ElevatedButton(
-                          //   style: ElevatedButton.styleFrom(
-                          //       backgroundColor: Colors.purple[100],
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(100),
-                          //       )),
-                          //   child: Icon(Icons.download_rounded, size: 40.0),
-                          //   onPressed: (downloadButton == true) ? () {
-                          //     _createPDF(); // Call the _createPDF function
-                          //   } : null,
-                          // ),),
 
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -475,8 +541,10 @@ class _ReportState extends State<Report> {
                                 isGeneratingPDF = true;
                               });
 
+                              await updateReportsNum();
+
                               // Introduce a slight delay to allow the UI to update
-                              await Future.delayed(Duration(milliseconds: 900)); // Adjust the duration as needed
+                              //await Future.delayed(Duration(milliseconds: 900)); // Adjust the duration as needed
 
                               await _createPDF(); // Wait for PDF generation to complete
 

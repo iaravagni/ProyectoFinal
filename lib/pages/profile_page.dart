@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'edit_info_page.dart';
 import 'navigation_page.dart';
 
-//UserData actualUser = new UserData();
 
 enum MenuItem{
   editInfo,

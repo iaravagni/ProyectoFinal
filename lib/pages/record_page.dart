@@ -548,7 +548,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
                                     )),
-                                child: Icon(Icons.play_arrow, size: 40.0),
+                                child: Icon(Icons.play_arrow_rounded, size: 40.0),
                                 onPressed: (startButton == true) ? () async {
                                   await _startRecording();
                                   startButton = false;
@@ -586,7 +586,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
                                     )),
-                                child: Icon(Icons.stop, size: 40.0),
+                                child: Icon(Icons.stop_rounded, size: 40.0),
                                 onPressed: (stopButton == true) ? () async {
                                   await _stopRecording();
                                   newRecButton = true;

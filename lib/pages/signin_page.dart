@@ -18,7 +18,7 @@ class _LoginState extends State<Login> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final _emailController = TextEditingController(text: 'vg@hotmail.com');
+  final _emailController = TextEditingController(text: 'iaru@gmail.com');
   final _passwordController = TextEditingController(text: '12345678');
 
   AutovalidateMode _autoValidate = AutovalidateMode.disabled;
