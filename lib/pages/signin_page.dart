@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../Resources/text_form.dart';
 
@@ -138,11 +137,13 @@ class _LoginState extends State<Login> {
                             ),
                             child: Center(
                               child: Text(
-                                'Sign In',
+                                'SIGN IN',
                                 style: TextStyle(
                                   color: Colors.white,
+                                  fontSize: 15.0,
+                                  letterSpacing: 2.0,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  // fontSize: 18,
                                 ),
                               ),
                             ),

@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'registration_page.dart';
 
 bool newUser = false;
-// bool corrioGoogle = false;
 
 Future<bool> getDoc(user) async{
   var a = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();

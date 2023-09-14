@@ -3,8 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:myapp/pages/google_sign_in_page.dart';
 import 'package:provider/provider.dart';
 
-import 'timer_provider.dart';
-import 'main_page.dart';
+import 'pages/timer_provider.dart';
+import 'pages/main_page.dart';
 
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:flutter_titled_container/flutter_titled_container.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../read%20data/get_user_name.dart';
 
 
 class Reports extends StatefulWidget {

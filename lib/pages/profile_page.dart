@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/Resources/user_info.dart';
 import '../Resources/my_clipper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -105,7 +104,7 @@ class _ProfileState extends State<Profile> {
                             // ),
 
                             Text(
-                              actualUser.name + ' ',
+                              '${actualUser.name} ',
                               style: const TextStyle(
                                 color: Colors.white, //Colors.grey[900],
                                 letterSpacing: 2.0,
@@ -117,6 +116,7 @@ class _ProfileState extends State<Profile> {
                             Text(
                               (actualUser.surname).toUpperCase(),
                               style: const TextStyle(
+                                //color: Colors.grey[800],
                                 color: Colors.white, //Colors.grey[900],
                                 letterSpacing: 2.0,
                                 fontSize: 45.0,
@@ -133,7 +133,8 @@ class _ProfileState extends State<Profile> {
                       Center(
                         child: Text(
                           '${actualUser.weeks} weeks pregnant',
-                          style: TextStyle(
+                          style: const TextStyle(
+                              //color: Colors.grey[800],
                               color: Colors.white,
                               letterSpacing: 2.0,
                               fontSize: 20.0
@@ -208,7 +209,7 @@ class _ProfileState extends State<Profile> {
                                     child: Text(
                                       actualUser.prevPreg,
                                       style: TextStyle(
-                                          color: Colors.grey[900],
+                                          color: Colors.grey[800],
                                           letterSpacing: 2.0,
                                           fontSize: 50.0
                                       ),
@@ -226,7 +227,7 @@ class _ProfileState extends State<Profile> {
                                     child: Text(
                                       actualUser.numChildren,
                                       style: TextStyle(
-                                          color: Colors.grey[900],
+                                          color: Colors.grey[800],
                                           letterSpacing: 2.0,
                                           fontSize: 50.0
                                       ),
@@ -296,7 +297,7 @@ class _ProfileState extends State<Profile> {
                                     child: Text(
                                       actualUser.pregRisk,
                                       style: TextStyle(
-                                          color: Colors.grey[900],
+                                          color: Colors.grey[800],
                                           letterSpacing: 2.0,
                                           fontSize: 50.0
                                       ),
@@ -314,7 +315,7 @@ class _ProfileState extends State<Profile> {
                                     child: Text(
                                       actualUser.reports,
                                       style: TextStyle(
-                                          color: Colors.grey[900],
+                                          color: Colors.grey[800],
                                           letterSpacing: 2.0,
                                           fontSize: 50.0
                                       ),
@@ -337,11 +338,11 @@ class _ProfileState extends State<Profile> {
                                 widget.updateSelectedIndex(1);
                               },
                               child: const Text(
-                                'Start recording',
+                                'START RECORDING',
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 18.0,
-                                    letterSpacing: 1.0,
+                                    fontSize: 15.0,
+                                    letterSpacing: 2.0,
                                     fontWeight: FontWeight.bold
                                 ),
                               ),

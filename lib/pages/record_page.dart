@@ -37,7 +37,8 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
   bool startButton = false;
   bool stopButton = false;
   bool downloadButton = false;
-  bool newRecButton = true;
+  bool newRecButton = false;
+  bool timerButton = false;
 
   bool showPainLevelInput = false;
   int painLevel = 0; // Variable to store the pain level
@@ -89,7 +90,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  Future<void> showPainLevelDialog(BuildContext context) async {
+  Future<void> showPainLevelDialog(BuildContext context, timerProvider) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -137,6 +138,10 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     setState(() {
                       startButton = true;
                       newRecButton = false;
+                      downloadButton = false;
+                      timerButton = true;
+                      timerProvider.reset();
+                      //totalData = [];
                       Navigator.of(context).pop(true); // Close the dialog
                     });
                   },
@@ -181,7 +186,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                 children: [
                   const Center(
                     child: Icon(
-                      Icons.bluetooth,
+                      Icons.bluetooth_rounded,
                       color: Colors.white70,
                       size: 50.0,),
                   ),
@@ -284,6 +289,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                           startButton = false;
                           stopButton = false;
                           connectButton = true;
+                          timerButton = false;
                           timerProvider.stop();
                           timerProvider.reset();
                           setState(() {
@@ -481,15 +487,15 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                         }),
                       ),
                       onPressed: (newRecButton == true) ? () async {
-                        await showPainLevelDialog(context);
+                        await showPainLevelDialog(context, timerProvider);
                         setState(() {});
                       } : null,
                       child: Text(
-                        'New recording',
+                        'NEW RECORDING',
                         style: TextStyle(
                           color: (newRecButton == true) ? Colors.white : Colors.grey[550], // Change the text color
-                          fontSize: 18.0,
-                          letterSpacing: 1.0,
+                          fontSize: 15.0,
+                          letterSpacing: 2.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -520,7 +526,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
                     SizedBox(height: 10),
 
-                    if (startButton || stopButton) ...[
+                    if (timerButton) ...[
                       Text(
                         timerProvider.formatTime(),
                         style: TextStyle(
@@ -592,7 +598,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                   newRecButton = true;
                                   stopButton = false;
                                   newRecButton = true;
-                                  startButton = true;
+                                  startButton = false;
                                   downloadButton = true;
                                   timerProvider.stop();
                                   //initState();
@@ -630,7 +636,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                         child: Icon(Icons.download, size: 40.0),
                         onPressed: (downloadButton == true) ? () async {
                           await saveCSVFile(totalData, painLevel);
-                          initState();
+                          setState(() {});();
                         } : null,
                       ),
                     ),

@@ -154,11 +154,12 @@ class _RegistrationState extends State<Registration> {
                                   ),
                                   child: const Center(
                                     child: Text(
-                                      'Create account',
+                                      'CREATE ACCOUNT',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 18,
+                                        fontSize: 15.0,
+                                        letterSpacing: 2.0,
                                       ),
                                     ),
                                   ),

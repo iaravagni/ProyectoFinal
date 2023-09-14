@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter/services.dart';
-import 'dart:io';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
@@ -51,7 +47,7 @@ class _ReportState extends State<Report> {
   }
 
   void updateReportItems(value){
-    reportItems.add(value);
+    actualUser.reportsName.add(value);
   }
 
 
@@ -390,7 +386,7 @@ class _ReportState extends State<Report> {
                               child: Text(
                                 numContractions,
                                 style: TextStyle(
-                                    color: Colors.grey[900],
+                                    color: Colors.grey[800],
                                     letterSpacing: 2.0,
                                     fontSize: 50.0
                                 ),
@@ -407,7 +403,7 @@ class _ReportState extends State<Report> {
                               child: Text(
                                 durationValue,
                                 style: TextStyle(
-                                    color: Colors.grey[900],
+                                    color: Colors.grey[800],
                                     letterSpacing: 2.0,
                                     fontSize: 50.0
                                 ),
@@ -476,7 +472,7 @@ class _ReportState extends State<Report> {
                               child: Text(
                                 frequencyValue,
                                 style: TextStyle(
-                                    color: Colors.grey[900],
+                                    color: Colors.grey[800],
                                     letterSpacing: 2.0,
                                     fontSize: 50.0
                                 ),
@@ -493,7 +489,7 @@ class _ReportState extends State<Report> {
                               child: Text(
                                 intensityValue,
                                 style: TextStyle(
-                                    color: Colors.grey[900],
+                                    color: Colors.grey[800],
                                     letterSpacing: 2.0,
                                     fontSize: 50.0
                                 ),

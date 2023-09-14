@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'profile_page.dart';
 import 'record_page.dart';
 import 'report_page.dart';
@@ -11,7 +10,7 @@ import 'package:myapp/Resources/user_info.dart';
 
 UserData actualUser = new UserData();
 
-List<String> reportItems = [];
+//List<String> reportItems = [];
 
 class Navigation extends StatefulWidget {
   @override
@@ -36,10 +35,10 @@ class _NavigationState extends State<Navigation> {
               (UserData s) => setState((){
               actualUser = s;
           }));
-      getReportName(actualUser.uid).then(
-              (List<String> r) => setState((){
-              reportItems = r;
-              }));
+      // getReportName(actualUser.uid).then(
+      //         (List<String> r) => setState((){
+      //         reportItems = r;
+      //         }));
     }
   }
 
@@ -58,7 +57,7 @@ class _NavigationState extends State<Navigation> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile' ),
           BottomNavigationBarItem(icon: Icon(Icons.fiber_manual_record_outlined), label: 'Record' ),
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Report' ),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History' )
+          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'History' )
         ],
         currentIndex: _selectedIndex,
         onTap: updateSelectedIndex

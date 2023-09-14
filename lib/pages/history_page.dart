@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -15,8 +14,8 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
-  List<bool> isGeneratingPDFList = List.generate(reportItems.length, (index) => false);
-  List<bool> isDeletingPDFList = List.generate(reportItems.length, (index) => false);
+  List<bool> isGeneratingPDFList = List.generate(actualUser.reportsName.length, (index) => false);
+  List<bool> isDeletingPDFList = List.generate(actualUser.reportsName.length, (index) => false);
 
   Future showPDF(currentReport, index) async {
     final pdfFileName = '$currentReport VAIA report.pdf';
@@ -55,7 +54,7 @@ class _HistoryState extends State<History> {
 
       // Remove the item from reportItems
       setState(() {
-        reportItems.removeAt(index);
+        actualUser.reportsName.removeAt(index);
       });
 
       // Update the user's reports count by subtracting 1
@@ -111,7 +110,7 @@ class _HistoryState extends State<History> {
                       SizedBox(height: 55.0),
                       Center(
                         child: Icon(
-                          Icons.history,
+                          Icons.history_rounded,
                           color: Colors.white70,
                           size: 50.0,
                         ),
@@ -135,9 +134,9 @@ class _HistoryState extends State<History> {
 
                 Expanded(
                   child: ListView.builder(
-                    itemCount: reportItems.length,
+                    itemCount: actualUser.reportsName.length,
                     itemBuilder: (context, index) {
-                      final currentReportName = reportItems[index];
+                      final currentReportName = actualUser.reportsName[index];
                       return Column(
                         children: [
                           ListTile(

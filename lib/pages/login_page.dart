@@ -3,11 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:myapp/pages/google_sign_in_page.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'loading_page.dart';
 import 'navigation_page.dart';
-import 'registration_page.dart';
 
 
 bool response = false;

@@ -1,8 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 
 class UserData {
   late String uid = '';
@@ -14,6 +11,7 @@ class UserData {
   late String numChildren = '';
   late String pregRisk = '';
   late String reports = '';
+  late List<String> reportsName = [];
 }
 
 class ReportItem {
@@ -45,28 +43,36 @@ Future<UserData> userInfo() async {
       actualUser.numChildren = user['numChildren'];
       actualUser.pregRisk = user['pregRisk'];
       actualUser.reports = user['reports'];
-    }
-  );
+      });
+
+  final QuerySnapshot querySnapshot = await _firestore.collection('reports')
+      .where('userUID', isEqualTo: actualUser.uid)
+      .get();
+
+  actualUser.reportsName = querySnapshot.docs
+      .map((doc) => doc['pdfIdentifier'] as String)
+      .toList();
+
 
   return actualUser;
 }
-
-Future<List<String>> getReportName(String userUID) async {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  try {
-    final QuerySnapshot querySnapshot = await firestore
-        .collection('reports')
-        .where('userUID', isEqualTo: userUID)
-        .get();
-
-    final List<String> reportItems = querySnapshot.docs
-        .map((doc) => doc['pdfIdentifier'] as String)
-        .toList();
-
-    return reportItems;
-  } catch (e) {
-    print('Error fetching user reports: $e');
-    return []; // Handle the error as needed
-  }
-}
+//
+// Future<List<String>> getReportName(String userUID) async {
+//   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+//
+//   try {
+//     final QuerySnapshot querySnapshot = await firestore
+//         .collection('reports')
+//         .where('userUID', isEqualTo: userUID)
+//         .get();
+//
+//     final List<String> reportItems = querySnapshot.docs
+//         .map((doc) => doc['pdfIdentifier'] as String)
+//         .toList();
+//
+//     return reportItems;
+//   } catch (e) {
+//     print('Error fetching user reports: $e');
+//     return []; // Handle the error as needed
+//   }
+// }
