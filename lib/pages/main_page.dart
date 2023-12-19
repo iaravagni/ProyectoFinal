@@ -13,6 +13,7 @@ class MainPage extends StatelessWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting){
+              print('loadingggg');
               return Center(child: Loading());
             } else if (snapshot.hasData) {
               return Navigation();

@@ -19,6 +19,7 @@ class Record extends StatefulWidget {
 
 }
 
+bool stopButton = false;
 // class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
@@ -35,7 +36,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
   bool connectButton = true;
   bool startButton = false;
-  bool stopButton = false;
+  //bool stopButton = false;
   bool downloadButton = false;
   bool newRecButton = false;
   bool timerButton = false;

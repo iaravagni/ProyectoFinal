@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../Resources/text_form.dart';
+import '../Resources/terms_and_conds.dart';
 
 class Registration extends StatefulWidget {
   final VoidCallback showLoginPage;
@@ -31,8 +32,14 @@ class _RegistrationState extends State<Registration> {
 
   AutovalidateMode _autoValidate = AutovalidateMode.disabled;
 
+  bool isTermsAccepted = true;
+
   void _validateInputs() {
-    if (_formKey.currentState!.validate()) {
+    setState(() {
+      isTermsAccepted = isChecked;
+    });
+
+    if (_formKey.currentState!.validate() && isChecked) {
       signUp();
     } else {
       setState(() {
@@ -96,6 +103,8 @@ class _RegistrationState extends State<Registration> {
       });
   }
 
+  bool isChecked=false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,11 +147,11 @@ class _RegistrationState extends State<Registration> {
 
                               Form(
                                 key: _formKey,
-                                child: FormUI(),
                                 autovalidateMode: _autoValidate,
+                                child: FormUI(),
                               ),
 
-                              const SizedBox(height: 30),
+                              const SizedBox(height:30),
 
                               GestureDetector(
                                 onTap: _validateInputs,
@@ -252,7 +261,64 @@ class _RegistrationState extends State<Registration> {
         ),
       ),
 
+      const SizedBox(height: 10.0),
 
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Checkbox(
+              activeColor: const Color(0xFF4c405c),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
+              value: isChecked,
+              onChanged: (bool? value){
+                setState(() {
+                  isChecked = value!;
+                });
+              }),
+
+          const Text('I have read and agreed to the'),
+
+        ],),
+
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(width: 50.0,),
+          GestureDetector(
+            onTap: () {
+              TermsAndConds.showTermsAndConditionsDialog(context);
+            },
+            child: const Text(
+              'Terms and Conditions',
+              style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 2,
+                  color: Color(0xFF4c405c),
+                  fontWeight: FontWeight.bold
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      if (!isTermsAccepted && !isChecked)
+        Column(
+          children: [
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 12,),
+                Text(
+                  'Please accept the terms and conditions',
+                  style: TextStyle(
+                    color: Colors.red[700],
+                    fontSize: 12.0,
+                  ),
+
+            ),]),
+          ],
+        )
 
 
     ],);

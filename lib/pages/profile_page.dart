@@ -49,7 +49,7 @@ class _ProfileState extends State<Profile> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           PopupMenuButton(
-                            icon: Icon(Icons.more_vert,color: Colors.white),
+                            icon: Icon(Icons.menu,color: Colors.white),
                             onSelected: (value){
                               if (value == MenuItem.editInfo){
                                 Route route = MaterialPageRoute(builder: (context) => const EditInfo());

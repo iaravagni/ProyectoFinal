@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/pages/procesamiento.dart';
+import 'bluetooth/BackgroundCollectingTask2.dart';
 import 'profile_page.dart';
 import 'record_page.dart';
 import 'report_page.dart';
 import 'history_page.dart';
 import 'loading_page.dart';
+import 'plot_page.dart';
 
 import 'package:myapp/Resources/user_info.dart';
 
-
 UserData actualUser = new UserData();
-
-//List<String> reportItems = [];
 
 class Navigation extends StatefulWidget {
   @override
@@ -56,6 +56,7 @@ class _NavigationState extends State<Navigation> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile' ),
           BottomNavigationBarItem(icon: Icon(Icons.fiber_manual_record_outlined), label: 'Record' ),
+          BottomNavigationBarItem(icon: Icon(Icons.auto_graph_rounded), label: 'Plot'),
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Report' ),
           BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'History' )
         ],
@@ -67,6 +68,8 @@ class _NavigationState extends State<Navigation> {
         children: [
           Profile(updateSelectedIndex),
           Record(),
+          EMGProcessingWidget(),
+          // Plot(plotButton: stopButton,),
           Report(),
           History(),
         ],

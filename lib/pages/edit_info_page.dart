@@ -120,8 +120,8 @@ class _EditInfoState extends State<EditInfo> {
 
                               Form(
                                 key: _formKey,
-                                child: FormUI(),
                                 autovalidateMode: _autoValidate,
+                                child: FormUI(),
                               ),
 
                               const SizedBox(height: 30),

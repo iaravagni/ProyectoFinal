@@ -121,6 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.2"
+  complex:
+    dependency: transitive
+    description:
+      name: complex
+      sha256: dba084899c0a4bd2fcba9a36760409171d7bee7c35a749cc4451348270361325
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.2"
   convert:
     dependency: transitive
     description:
@@ -138,13 +146,13 @@ packages:
     source: hosted
     version: "3.0.3"
   csv:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: csv
-      sha256: "016b31a51a913744a0a1655c74ff13c9379e1200e246a03d96c81c5d9ed297b5"
+      sha256: "142bdf2b24f4a49e35a0fc4398f21d861c4c0f9015e8054dcacd0bb8e23ee27d"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.1.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -161,6 +169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.9"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
   fake_async:
     dependency: transitive
     description:
@@ -273,6 +289,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.6"
+  fl_chart:
+    dependency: "direct dev"
+    description:
+      name: fl_chart
+      sha256: c1e26c7e48496be85104c16c040950b0436674cdf0737f3f6e95511b2529b592
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.63.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -400,6 +424,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  iirjdart:
+    dependency: "direct main"
+    description:
+      name: iirjdart
+      sha256: "5bd8aa6af6ee67473fbf7fbbfc7b992d0bb95768a16aaa62e70613389e564df8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   image:
     dependency: transitive
     description:
@@ -616,6 +648,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
+  scidart:
+    dependency: "direct main"
+    description:
+      name: scidart
+      sha256: af816eed552cadb6a9a324c594515b0cdff41617839345c382047927bd8dc02d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2-dev.12"
   scoped_model:
     dependency: "direct dev"
     description:
@@ -669,22 +709,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  syncfusion_flutter_charts:
+    dependency: "direct dev"
+    description:
+      name: syncfusion_flutter_charts
+      sha256: b1c706cea163059ecfe89132ca078f83d31e54cc99ecd1fabe4810e1b1dacc95
+      url: "https://pub.dev"
+    source: hosted
+    version: "23.1.36"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "9f0a4593f7642b2f106e329734d0e5fc746baf8d0a59495eec586cd0d9ba7d02"
+      sha256: aea119c8117953fa5decf4a313b431e556b0959cd35ff88f8fbdc0eda9bedb06
       url: "https://pub.dev"
     source: hosted
-    version: "22.2.12"
+    version: "23.1.36"
   syncfusion_flutter_pdf:
     dependency: "direct dev"
     description:
       name: syncfusion_flutter_pdf
-      sha256: "05d1a6cde581504cf1e86307fe308a6d1433903677b604d006ed67ef19a4fbc6"
+      sha256: "76a50a1d580714c078e2827adbd8b00d5f5c606879d07c44c5d99f0e864edda1"
       url: "https://pub.dev"
     source: hosted
-    version: "22.2.12"
+    version: "23.1.36"
   term_glyph:
     dependency: transitive
     description:

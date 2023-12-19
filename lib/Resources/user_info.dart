@@ -20,7 +20,6 @@ class ReportItem {
   ReportItem(this.pdfName);
 }
 
-
 Future<UserData> userInfo() async {
 
   UserData actualUser = new UserData();
@@ -31,7 +30,8 @@ Future<UserData> userInfo() async {
 
   await docRef.get().then(
         (DocumentSnapshot doc) {
-
+      print(doc);
+      if (doc.exists){
       final user = doc.data() as Map<String, dynamic>;
 
       actualUser.uid = userUID;
@@ -43,7 +43,7 @@ Future<UserData> userInfo() async {
       actualUser.numChildren = user['numChildren'];
       actualUser.pregRisk = user['pregRisk'];
       actualUser.reports = user['reports'];
-      });
+      }});
 
   final QuerySnapshot querySnapshot = await _firestore.collection('reports')
       .where('userUID', isEqualTo: actualUser.uid)
@@ -56,7 +56,7 @@ Future<UserData> userInfo() async {
 
   return actualUser;
 }
-//
+
 // Future<List<String>> getReportName(String userUID) async {
 //   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 //

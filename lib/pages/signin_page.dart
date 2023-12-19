@@ -57,7 +57,7 @@ class _LoginState extends State<Login> {
                 onPressed: (){Navigator.pop(context);},
                 child: Text('OK'),
               style: TextButton.styleFrom(
-                primary: Colors.deepPurple, // Text Color
+                foregroundColor: Colors.deepPurple, // Text Color
               ),)],
 
           );

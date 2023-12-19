@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'dart:typed_data';
 
 
 List<double> totalData = [];
@@ -25,7 +24,7 @@ class BackgroundCollectingTask extends Model {
 
   BackgroundCollectingTask._fromConnection(this._connection) {
     _connection.input?.listen((List<int> data) {
-      print('Received data: $data');
+      //print('Received data: $data');
       data.forEach((byte) {
         // print('Processing byte: $byte');
         if (byte == 'A'.codeUnitAt(0)) {
@@ -39,19 +38,19 @@ class BackgroundCollectingTask extends Model {
 
           // End of package identifier
           print('Package end');
-          print(packageData.length);
+          //print(packageData.length);
           packageStarted = false;
 
           // Process the complete package
           int bufferLength = 200;
 
           if (packageData.length == bufferLength) {
-            totalData.addAll(_processPackage(packageData));
-            print('Total data: $totalData');  
-            
-            print('Total data length:');
-            print(totalData.length);
-            // print('Package: $packageData');
+              totalData.addAll(_processPackage(packageData));
+              //print('Total data: $totalData');
+
+              //print('Total data length:');
+              //print(totalData.length);
+              // print('Package: $packageData');
           }
         } else {
           if (packageStarted) {
@@ -118,9 +117,12 @@ class BackgroundCollectingTask extends Model {
     for (int i = 0; i < package.length; i += 2) {
       int highByte = package[i];
       int lowByte = package[i + 1];
-      int combinedValue = (highByte << 8) | lowByte; // Combine the high and low bytes correctly
-      double originalReading = combinedValue * (5.0 / 1023.0); // Convert the combined value to the original reading
-      double roundedValue = (originalReading * 1000).round() / 1000; // Round to 3 decimal places
+      int combinedValue = (highByte <<
+          8) | lowByte; // Combine the high and low bytes correctly
+      double originalReading = combinedValue *
+          (5.0 / 1023.0); // Convert the combined value to the original reading
+      double roundedValue = (originalReading * 1000).round() /
+          1000; // Round to 3 decimal places
       receivedData.add(roundedValue);
     }
 
