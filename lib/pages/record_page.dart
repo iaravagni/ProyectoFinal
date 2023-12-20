@@ -7,11 +7,14 @@ import 'dart:io';
 import 'package:provider/provider.dart';
 
 
+import '../Resources/carousel_widget.dart';
 import 'timer_provider.dart';
 import 'bluetooth/BackgroundCollectingTask2.dart';
 import 'bluetooth/SelectBondedDevicePage.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:carousel_slider/carousel_slider.dart';
 
 class Record extends StatefulWidget {
   @override
@@ -473,6 +476,14 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     // ),
 
                     const SizedBox(height: 20.0),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        MyImageCarouselWidget(),
+                        //const SizedBox(width: 10,)
+                      ],
+                    ),
 
                     TextButton(
                       style: ButtonStyle(

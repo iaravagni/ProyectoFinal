@@ -53,7 +53,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.0 #flutter_lints: ^3.0.1
   cupertino_icons: ^1.0.2
   scoped_model: ^2.0.0
   firebase_core: ^2.15.1
@@ -77,6 +77,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   fl_chart: ^0.63.0
   syncfusion_flutter_charts: ^23.1.36
+  carousel_slider: ^4.2.1
 
 flutter_icons:
   android: true
@@ -101,6 +102,7 @@ flutter:
   assets:
     - assets/signals/
     - assets/report/figures/
+    #- assets/Tutorial
     - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
