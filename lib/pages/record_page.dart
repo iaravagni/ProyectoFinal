@@ -40,7 +40,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
   bool connectButton = true;
   bool startButton = false;
   //bool stopButton = false;
-  bool downloadButton = false;
+  //bool downloadButton = false;
   bool newRecButton = false;
   bool timerButton = false;
 
@@ -142,7 +142,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     setState(() {
                       startButton = true;
                       newRecButton = false;
-                      downloadButton = false;
+                      //downloadButton = false;
                       timerButton = true;
                       timerProvider.reset();
                       //totalData = [];
@@ -246,11 +246,15 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     ],
                   ),
 
-                  const SizedBox(height: 30.0),
+                  const SizedBox(height: 25.0),
 
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple[50]),
+                      backgroundColor: Colors.purple[50],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0), // Adjust the value as needed
+                      ),
+                    ),
                     child: Container(
                         height: 100.0,
                         width: 100.0,
@@ -263,13 +267,13 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                               Text('Disconnect'),
                               Text('device')
                             ])
-                            : Column(
+                            : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.leak_add, size: 40.0,),
+                            children: [
+                              Icon(Icons.leak_add, size: 40.0, color: Color(0xFFFFFFFF),),
                               SizedBox(height: 5.0),
-                              Text('Connect'),
-                              Text('device')
+                              Text('Connect', style: TextStyle(color: Color(0xFFFFFFFF)),),
+                              Text('device', style: TextStyle(color: Color(0xFFFFFFFF)),)
                             ]))
                     ),
                     onPressed: () async {
@@ -475,13 +479,13 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                     //
                     // ),
 
-                    const SizedBox(height: 20.0),
+                    // const SizedBox(height: 10.0),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         MyImageCarouselWidget(),
-                        //const SizedBox(width: 10,)
+                        const SizedBox(width: 20,)
                       ],
                     ),
 
@@ -513,18 +517,18 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                       ),
                     ),
 
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
                     Center(
                     child: stopButton ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.fiber_manual_record,
                             color: Colors.red,
                             size: 15,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
                             'Recording...',
                             style: TextStyle(
@@ -571,7 +575,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                   await _startRecording();
                                   startButton = false;
                                   stopButton = true;
-                                  downloadButton = false;
+                                  //downloadButton = false;
                                   timerProvider.start();
                                   setState(() {});
                                 } : null,
@@ -607,11 +611,12 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                 child: Icon(Icons.stop_rounded, size: 40.0),
                                 onPressed: (stopButton == true) ? () async {
                                   await _stopRecording();
+                                  await saveCSVFile(totalData, painLevel);
                                   newRecButton = true;
                                   stopButton = false;
                                   newRecButton = true;
                                   startButton = false;
-                                  downloadButton = true;
+                                  //downloadButton = true;
                                   timerProvider.stop();
                                   //initState();
                                   setState(() {});
@@ -636,22 +641,22 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                       ],
                     ),
 
-                    const SizedBox(height: 10.0),
+                    // const SizedBox(height: 10.0),
 
-                    Center(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple[100],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100),
-                            )),
-                        child: Icon(Icons.download, size: 40.0),
-                        onPressed: (downloadButton == true) ? () async {
-                          await saveCSVFile(totalData, painLevel);
-                          setState(() {});();
-                        } : null,
-                      ),
-                    ),
+                    // Center(
+                    //   child: ElevatedButton(
+                    //     style: ElevatedButton.styleFrom(
+                    //         backgroundColor: Colors.purple[100],
+                    //         shape: RoundedRectangleBorder(
+                    //           borderRadius: BorderRadius.circular(100),
+                    //         )),
+                    //     child: Icon(Icons.download, size: 40.0),
+                    //     onPressed: (downloadButton == true) ? () async {
+                    //       await saveCSVFile(totalData, painLevel);
+                    //       setState(() {});();
+                    //     } : null,
+                    //   ),
+                    // ),
 
 
                   ],

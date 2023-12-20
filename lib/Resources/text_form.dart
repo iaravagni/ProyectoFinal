@@ -21,14 +21,15 @@ Widget ParameterWidget(_controller, _validator, var variable1,  {var variable2='
 
         TextFormField(
           obscureText: obscure,
+          cursorColor: const Color(0xFF4c405c),
           controller: _controller,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white),
+                borderSide: const BorderSide(color: Colors.white),
                 borderRadius: BorderRadius.circular(12)
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF4c405c)),
+              borderSide: const BorderSide(color: Color(0xFF4c405c)),
               borderRadius: BorderRadius.circular(12),
             ),
             fillColor: Colors.grey[200],

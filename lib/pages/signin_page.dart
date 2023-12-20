@@ -99,7 +99,7 @@ class _LoginState extends State<Login> {
                   //    )
                   // ),
 
-                  SizedBox(height: 10),
+                  //SizedBox(height: 5),
                   Text(
                   'Welcome back, you\'ve been missed!',
                   style: TextStyle(color: Colors.grey[800], fontSize: 16, letterSpacing: 2.0),),
@@ -108,7 +108,7 @@ class _LoginState extends State<Login> {
                   // ),
                   // ),
 
-                  SizedBox(height: 50),
+                  const SizedBox(height: 25),
 
                   Container(
                     decoration: const BoxDecoration(
@@ -135,7 +135,7 @@ class _LoginState extends State<Login> {
                               color: Color(0xFF4c405c),
                               borderRadius: BorderRadius.circular((12)),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'SIGN IN',
                                 style: TextStyle(
@@ -161,7 +161,7 @@ class _LoginState extends State<Login> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         'Not a member? ',
                         style: TextStyle(
                           color: Colors.black,
@@ -169,7 +169,7 @@ class _LoginState extends State<Login> {
                       ),
                       GestureDetector(
                         onTap: widget.showRegisterPage,
-                        child: Text(
+                        child: const Text(
                           'Register now',
                           style: TextStyle(
                               decoration: TextDecoration.underline,

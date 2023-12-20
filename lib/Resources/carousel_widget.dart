@@ -11,7 +11,7 @@ class _MyImageCarouselWidgetState extends State<MyImageCarouselWidget> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.info_outline_rounded), // Replace with your desired icon
+      icon: Icon(Icons.info_outline_rounded, color: Colors.grey[700],), // Replace with your desired icon
       onPressed: () => _showImageCarouselDialog(context),
     );
   }
@@ -30,9 +30,7 @@ class _MyImageCarouselWidgetState extends State<MyImageCarouselWidget> {
                     height: 200,
                     enableInfiniteScroll: false,
                   ),
-                  items: List.generate(
-                    6, // Change this to the total number of images
-                        (index) {
+                  items: List.generate(6, (index) {
                       return Image.asset(
                         'assets/Tutorial/${index + 1}.png',
                         fit: BoxFit.cover,

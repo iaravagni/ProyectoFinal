@@ -68,20 +68,20 @@ class _ProfileState extends State<Profile> {
                               ),
                             ),
                             itemBuilder: (context) => [
-                              PopupMenuItem(
+                              const PopupMenuItem(
                                 value: MenuItem.editInfo,
                                   child: Row(
-                                    children: const [
+                                    children: [
                                       Icon(Icons.edit),
                                       SizedBox(width: 10,),
                                       Text('Edit profile'),
                                     ],
                                   )
                               ),
-                              PopupMenuItem(
+                              const PopupMenuItem(
                                 value: MenuItem.logOut,
                                 child: Row(
-                                  children: const [
+                                  children: [
                                     Icon(Icons.logout),
                                     SizedBox(width: 10,),
                                     Text('Log out'),
@@ -128,7 +128,7 @@ class _ProfileState extends State<Profile> {
                       ),
 
 
-                      const SizedBox(height: 15.0),
+                      const SizedBox(height: 5),
 
                       Center(
                         child: Text(
@@ -143,7 +143,7 @@ class _ProfileState extends State<Profile> {
                       ),
 
 
-                      const SizedBox(height: 110.0),
+                      const SizedBox(height: 90.0),
 
                       Padding(
                         padding: const EdgeInsets.only(left: 60.0, right: 60.0),
