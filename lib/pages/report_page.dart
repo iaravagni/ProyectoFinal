@@ -150,7 +150,7 @@ class _ReportState extends State<Report> {
 
       currentPage.graphics.drawLine(
         PdfPen(PdfColor(0, 0, 0), width: 0.5), // Pen for the line (black color, 1-point width)
-        Offset(0, 110), // Starting point (X, Y)
+        const Offset(0, 110), // Starting point (X, Y)
         Offset(pageSize.width, 110), // Ending point (X, Y)
       );
 
@@ -324,7 +324,7 @@ class _ReportState extends State<Report> {
                       SizedBox(height: 20.0),
                       ],),),
 
-                const SizedBox(height: 70.0),
+                const SizedBox(height: 50.0),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(60.0,0.0,60.0,0.0),
                   child: Column( children: [
@@ -498,7 +498,7 @@ class _ReportState extends State<Report> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 60.0),
+                      const SizedBox(height: 50.0),
 
                       // Center(
                       //   child: ElevatedButton(
@@ -531,7 +531,7 @@ class _ReportState extends State<Report> {
                             ),
                             child: isGeneratingPDF
                                 ? SpinKitFadingCircle(color: Colors.white)// Display a loading indicator while generating
-                                : Icon(Icons.download_rounded, size: 40.0),
+                                : Icon(Icons.download_rounded, color: Colors.white, size: 40.0),
                             onPressed: (downloadButton == true && !isGeneratingPDF) ? () async {
                               setState(() {
                                 isGeneratingPDF = true;

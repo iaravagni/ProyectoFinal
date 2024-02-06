@@ -160,11 +160,11 @@ class _HistoryState extends State<History> {
 
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    primary: Colors.transparent, // Set background color to transparent
+                                    backgroundColor: Colors.transparent, // Set background color to transparent
                                     elevation: 0, // Remove shadow
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
-                                      side: BorderSide(color: Colors.transparent), // Add a border to make it visible
+                                      side: const BorderSide(color: Colors.transparent), // Add a border to make it visible
                                     ),
                                   ),
                                   child: isDeletingPDFList[index]
@@ -178,11 +178,11 @@ class _HistoryState extends State<History> {
 
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    primary: Colors.transparent, // Set background color to transparent
+                                    backgroundColor: Colors.transparent, // Set background color to transparent
                                     elevation: 0, // Remove shadow
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
-                                      side: BorderSide(color: Colors.transparent), // Add a border to make it visible
+                                      side: const BorderSide(color: Colors.transparent), // Add a border to make it visible
                                     ),
                                   ),
                                   child: isGeneratingPDFList[index]

@@ -122,7 +122,14 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple[100],
-        title: Text('Select device'),
+        title: Text('Select device',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[
           _isDiscovering
               ? FittedBox(
