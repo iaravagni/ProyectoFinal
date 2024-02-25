@@ -94,7 +94,10 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
     });
   }
 
+
   Future<void> showPainLevelDialog(BuildContext context, timerProvider) async {
+    print(Theme.of(context).dialogBackgroundColor);
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -165,6 +168,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
       },
     );
   }
+
 
 
   @override
@@ -259,13 +263,15 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                         height: 100.0,
                         width: 100.0,
                         child: ((connectButton == false)
-                            ? Column(
+                            ? const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.leak_remove, size: 40.0,),
+                            children: [
+                              Icon(Icons.leak_remove, size: 40.0, color: Color(0xFFFFFFFF),),
                               SizedBox(height: 5.0),
-                              Text('Disconnect'),
-                              Text('device')
+                              //Text('Disconnect'),
+                              //Text('device')
+                              Text('Disconnect', style: TextStyle(color: Color(0xFFFFFFFF)),),
+                              Text('device', style: TextStyle(color: Color(0xFFFFFFFF)),)
                             ])
                             : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -553,7 +559,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                       ),
                     ],
 
-                    const SizedBox(height: 30.0),
+                    const SizedBox(height: 15.0),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -570,7 +576,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
                                     )),
-                                child: Icon(Icons.play_arrow_rounded, size: 40.0),
+                                child: Icon(Icons.play_arrow_rounded, size: 40.0, color: startButton ? Colors.white : null),
                                 onPressed: (startButton == true) ? () async {
                                   await _startRecording();
                                   startButton = false;
@@ -608,13 +614,13 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
                                     )),
-                                child: Icon(Icons.stop_rounded, size: 40.0),
+                                child: Icon(Icons.stop_rounded, size: 40.0, color: stopButton ? Colors.white : null),
                                 onPressed: (stopButton == true) ? () async {
                                   await _stopRecording();
                                   await saveCSVFile(totalData, painLevel);
                                   newRecButton = true;
                                   stopButton = false;
-                                  newRecButton = true;
+                                  //newRecButton = true;
                                   startButton = false;
                                   //downloadButton = true;
                                   timerProvider.stop();

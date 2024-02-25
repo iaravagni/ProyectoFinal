@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 
 import 'navigation_page.dart';
+import 'signal_processing.dart';
 
 class Report extends StatefulWidget{
 
@@ -19,6 +20,8 @@ class Report extends StatefulWidget{
 
 class _ReportState extends State<Report> {
 
+  late ReportParam report;
+
   bool downloadButton = true;
   bool isGeneratingPDF = false; // Variable to track PDF generation state
 
@@ -26,11 +29,31 @@ class _ReportState extends State<Report> {
   String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String patientAge = actualUser.age;
   String weeksPregnant = actualUser.weeks;
-  String durationValue = '30 s';
-  String frequencyValue = '5 min';
-  String intensityValue = '5 mV';
-  String numContractions = '10';
-  String measurementDuration = '20 seconds';
+  String durationValue = '-';
+  String frequencyValue = '-';
+  String intensityValue = '-';
+  String numContractions = '-';
+  String measurementDuration = '20 seconds'; //todo: Actualizar
+
+  // Método asincrónico para procesar la señal
+  Future<void> _processSignal() async {
+    // Esperar el resultado de SignalProcessing
+    report = await SignalProcessing();
+
+    // Llamar setState para reconstruir el widget con la nueva información
+    setState(() {
+
+      durationValue = '${report.duration}';
+      numContractions = '${report.number}';
+      frequencyValue = '${report.last10}';
+      intensityValue = '${report.intensity.toStringAsFixed(2)}';
+
+
+    });
+  }
+
+
+
 
   Future updateReportsNum() async {
 
@@ -103,16 +126,16 @@ class _ReportState extends State<Report> {
     gridContractions.columns.add(count: 1);
 
     PdfGridRow rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Duration: $durationValue''econds';
+    rowC.cells[0].value = 'Duration: $durationValue''seconds';
 
     rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Frequency: $frequencyValue''utes';
+    rowC.cells[0].value = 'Number of contractions in the last 10 minutes: $frequencyValue';
 
     rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Intensity: $intensityValue';
+    rowC.cells[0].value = 'Intensity: $intensityValue mV';
 
     rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Number of contractions: $numContractions';
+    rowC.cells[0].value = 'Total number of contractions: $numContractions';
 
     transparentBorders(gridContractions);
 
@@ -285,6 +308,10 @@ class _ReportState extends State<Report> {
 
 
   @override
+  void initState() {
+    super.initState();
+    _processSignal(); // Iniciar el procesamiento de la señal cuando se crea el estado del widget
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -332,7 +359,7 @@ class _ReportState extends State<Report> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'NUMBER OF',
+                            'TOTAL NUMBER',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
@@ -340,7 +367,7 @@ class _ReportState extends State<Report> {
                             ),
                           ),
                           Text(
-                            'DURATION OF',
+                            'AVG. DURATION OF',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
@@ -354,7 +381,7 @@ class _ReportState extends State<Report> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'CONTRACTIONS',
+                            'OF CONTRACTIONS',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
@@ -362,7 +389,7 @@ class _ReportState extends State<Report> {
                             ),
                           ),
                           Text(
-                            'CONTRACTIONS',
+                            'CONTRACTIONS (s)',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
@@ -419,7 +446,7 @@ class _ReportState extends State<Report> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'TIME BETWEEN',
+                            'CONTRACTIONS IN',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
@@ -440,7 +467,7 @@ class _ReportState extends State<Report> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'CONTRACTIONS',
+                            'THE LAST 10 MIN',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
@@ -448,7 +475,7 @@ class _ReportState extends State<Report> {
                             ),
                           ),
                           Text(
-                            'INTENSITY',
+                            'INTENSITY (mV)',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,

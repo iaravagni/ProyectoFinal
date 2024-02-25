@@ -21,6 +21,10 @@ class MyApp extends StatelessWidget {
       ChangeNotifierProvider(create: (_) => TimerProvider()),
     ],
     child: MaterialApp(
+      theme: ThemeData(
+        // Set the background color of AlertDialogs to white
+        dialogBackgroundColor: Colors.white,
+      ),
       home: MainPage(),
     ),
   );

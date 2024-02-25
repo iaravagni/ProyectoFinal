@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/pages/procesamiento.dart';
+import 'package:myapp/pages/procesamiento_page.dart';
 import 'bluetooth/BackgroundCollectingTask2.dart';
 import 'profile_page.dart';
 import 'record_page.dart';
