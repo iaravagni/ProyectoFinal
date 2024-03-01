@@ -8,6 +8,13 @@ class TimerProvider extends ValueNotifier<Duration> {
 
   TimerProvider() : super(Duration.zero);
 
+  Duration get value => _stopwatch.elapsed;
+
+  // set value(Duration newValue) {
+  //   _stopwatch.elapsed;
+  //   notifyListeners(); // Notifica a los oyentes cuando cambia el valor del temporizador
+  // }
+
   bool get isRunning => _isRunning;
 
   void start() {
@@ -17,6 +24,7 @@ class TimerProvider extends ValueNotifier<Duration> {
       _stopwatch.start();
       _timer = Timer.periodic(Duration(milliseconds: 10), (_) {
         value = _stopwatch.elapsed;
+        notifyListeners();
       });
     }
   }
@@ -56,4 +64,5 @@ class TimerProvider extends ValueNotifier<Duration> {
     super.dispose();
   }
 }
+
 

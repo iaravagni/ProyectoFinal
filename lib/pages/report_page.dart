@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/pages/bluetooth/BackgroundCollectingTask2.dart';
+import 'package:myapp/pages/record_page.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
@@ -7,20 +10,18 @@ import 'package:intl/intl.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-
-
+import 'timer_provider.dart';
 import 'navigation_page.dart';
 import 'signal_processing.dart';
 
-class Report extends StatefulWidget{
-
+class Report extends StatefulWidget {
   @override
   State<Report> createState() => _ReportState();
 }
 
 class _ReportState extends State<Report> {
-
   late ReportParam report;
+  bool _hasProcessed = false; // Variable para rastrear si ya has procesado el intervalo de  10 segundos
 
   bool downloadButton = true;
   bool isGeneratingPDF = false; // Variable to track PDF generation state
@@ -36,43 +37,35 @@ class _ReportState extends State<Report> {
   String measurementDuration = '20 seconds'; //todo: Actualizar
 
   // Método asincrónico para procesar la señal
-  Future<void> _processSignal() async {
+  Future<void> _processSignal(List<double> totalData, Duration duration) async {
     // Esperar el resultado de SignalProcessing
-    report = await SignalProcessing();
+    report = await SignalProcessing(totalData, duration);
 
     // Llamar setState para reconstruir el widget con la nueva información
     setState(() {
-
       durationValue = '${report.duration}';
       numContractions = '${report.number}';
+      // frequencyValue = '${report.frequency}';
       frequencyValue = '${report.last10}';
       intensityValue = '${report.intensity.toStringAsFixed(2)}';
-
-
     });
   }
 
-
-
-
   Future updateReportsNum() async {
-
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
     String reportsNum = (int.parse(actualUser.reports) + 1).toString();
 
     actualUser.reports = reportsNum;
 
-    await _firestore.collection('users').doc(actualUser.uid).update(
-        {
-          'reports': reportsNum,
-        });
+    await _firestore.collection('users').doc(actualUser.uid).update({
+      'reports': reportsNum,
+    });
   }
 
-  void updateReportItems(value){
+  void updateReportItems(value) {
     actualUser.reportsName.add(value);
   }
-
 
   // PDF generation function
   Future<void> _createPDF() async {
@@ -85,9 +78,8 @@ class _ReportState extends State<Report> {
     //Patient info header
     PdfGrid gridPatient = PdfGrid();
     gridPatient.style = PdfGridStyle(
-        font: PdfStandardFont(font,9),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2,bottom: 2)
-    );
+        font: PdfStandardFont(font, 9),
+        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
 
     gridPatient.columns.add(count: 2);
 
@@ -103,7 +95,8 @@ class _ReportState extends State<Report> {
 
     // Title
     const String title = 'Pregnancy Contractions Report';
-    final PdfFont fontTitle = PdfStandardFont(font, 14, style: PdfFontStyle.bold);
+    final PdfFont fontTitle =
+        PdfStandardFont(font, 14, style: PdfFontStyle.bold);
 
     final Size textSizeTitle = fontTitle.measureString(title);
 
@@ -114,22 +107,23 @@ class _ReportState extends State<Report> {
     const String subtitle1 = 'Contractions information';
     const String subtitle2 = 'Measurement information';
 
-    final PdfFont fontSubtitle = PdfStandardFont(font, 12, style: PdfFontStyle.bold);
+    final PdfFont fontSubtitle =
+        PdfStandardFont(font, 12, style: PdfFontStyle.bold);
 
     //Contractions grid
     PdfGrid gridContractions = PdfGrid();
     gridContractions.style = PdfGridStyle(
-        font: PdfStandardFont(font,10),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2,bottom: 2)
-    );
+        font: PdfStandardFont(font, 10),
+        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
 
     gridContractions.columns.add(count: 1);
 
     PdfGridRow rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Duration: $durationValue''seconds';
+    rowC.cells[0].value = 'Duration: $durationValue' 'seconds';
 
     rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Number of contractions in the last 10 minutes: $frequencyValue';
+    rowC.cells[0].value =
+        'Number of contractions in the last 10 minutes: $frequencyValue';
 
     rowC = gridContractions.rows.add();
     rowC.cells[0].value = 'Intensity: $intensityValue mV';
@@ -142,9 +136,8 @@ class _ReportState extends State<Report> {
     //Measurement grid
     PdfGrid gridMeasure = PdfGrid();
     gridMeasure.style = PdfGridStyle(
-        font: PdfStandardFont(font,10),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2,bottom: 2)
-    );
+        font: PdfStandardFont(font, 10),
+        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
 
     gridMeasure.columns.add(count: 1);
 
@@ -153,12 +146,10 @@ class _ReportState extends State<Report> {
 
     transparentBorders(gridMeasure);
 
-
     // PDF Layout
 
     //Header & footer
     for (int pageIndex = 1; pageIndex <= document.pages.count; pageIndex++) {
-
       //Header
 
       final PdfPage currentPage = document.pages[pageIndex - 1];
@@ -168,11 +159,11 @@ class _ReportState extends State<Report> {
           Rect.fromLTWH(0, 0, pageSize.width, 60));
 
       gridPatient.draw(
-          page: currentPage, bounds: const Rect.fromLTWH(10, 70, 0, 0)
-      );
+          page: currentPage, bounds: const Rect.fromLTWH(10, 70, 0, 0));
 
       currentPage.graphics.drawLine(
-        PdfPen(PdfColor(0, 0, 0), width: 0.5), // Pen for the line (black color, 1-point width)
+        PdfPen(PdfColor(0, 0, 0),
+            width: 0.5), // Pen for the line (black color, 1-point width)
         const Offset(0, 110), // Starting point (X, Y)
         Offset(pageSize.width, 110), // Ending point (X, Y)
       );
@@ -186,54 +177,59 @@ class _ReportState extends State<Report> {
       final double xFooter = (pageSize.width - textSizeFooter.width) / 2;
       final double yFooter = currentPage.getClientSize().height - 36;
 
-
       currentPage.graphics.drawLine(
-        PdfPen(PdfColor(0, 0, 0), width: 0.1), // Pen for the line (black color, 1-point width)
-        Offset(0, yFooter+5), // Starting point (X, Y)
-        Offset(xFooter - 5, yFooter+5), // Ending point (X, Y) (adjust the -5 as needed for spacing)
+        PdfPen(PdfColor(0, 0, 0),
+            width: 0.1), // Pen for the line (black color, 1-point width)
+        Offset(0, yFooter + 5), // Starting point (X, Y)
+        Offset(
+            xFooter - 5,
+            yFooter +
+                5), // Ending point (X, Y) (adjust the -5 as needed for spacing)
       );
 
-      currentPage.graphics.drawString(footer, fontFooter, bounds: Rect.fromLTWH(xFooter, yFooter, 0,0));
+      currentPage.graphics.drawString(footer, fontFooter,
+          bounds: Rect.fromLTWH(xFooter, yFooter, 0, 0));
 
       // Calculate the starting and ending points for the second line
-      final double xSecondLineStart = xFooter + textSizeFooter.width -10; // Adjust the 5 for spacing
+      final double xSecondLineStart =
+          xFooter + textSizeFooter.width - 10; // Adjust the 5 for spacing
       final double xSecondLineEnd = pageSize.width;
 
       // Draw the second line starting just after the footer and ending at the right margin
       currentPage.graphics.drawLine(
-        PdfPen(PdfColor(0, 0, 0), width: 0.1), // Pen for the second line (black color, 1-point width)
-        Offset(xSecondLineStart, yFooter+5), // Starting point (X, Y)
-        Offset(xSecondLineEnd, yFooter+5), // Ending point (X, Y)
+        PdfPen(PdfColor(0, 0, 0),
+            width: 0.1), // Pen for the second line (black color, 1-point width)
+        Offset(xSecondLineStart, yFooter + 5), // Starting point (X, Y)
+        Offset(xSecondLineEnd, yFooter + 5), // Ending point (X, Y)
       );
-
-
     }
 
     // Page 1
 
-    page1.graphics.drawString(title, fontTitle, bounds: Rect.fromLTWH(xTitle, yTitle, textSizeTitle.width, textSizeTitle.height));
+    page1.graphics.drawString(title, fontTitle,
+        bounds: Rect.fromLTWH(
+            xTitle, yTitle, textSizeTitle.width, textSizeTitle.height));
 
-    page1.graphics.drawString(subtitle1, fontSubtitle, bounds: Rect.fromLTWH(10, 160, 0, 0));
+    page1.graphics.drawString(subtitle1, fontSubtitle,
+        bounds: Rect.fromLTWH(10, 160, 0, 0));
 
     gridContractions.draw(
-        page: page1, bounds: const Rect.fromLTWH(10, 180, 0, 0)
-    );
+        page: page1, bounds: const Rect.fromLTWH(10, 180, 0, 0));
 
-    page1.graphics.drawString(subtitle2, fontSubtitle, bounds: Rect.fromLTWH(10, 280, 0, 0));
+    page1.graphics.drawString(subtitle2, fontSubtitle,
+        bounds: Rect.fromLTWH(10, 280, 0, 0));
 
-    gridMeasure.draw(
-        page: page1, bounds: const Rect.fromLTWH(10, 300, 0, 0)
-    );
+    gridMeasure.draw(page: page1, bounds: const Rect.fromLTWH(10, 300, 0, 0));
 
-    page1.graphics.drawImage(
-        PdfBitmap(await _readImageData('emg_signal.png')),
+    page1.graphics.drawImage(PdfBitmap(await _readImageData('emg_signal.png')),
         Rect.fromLTWH(0, 320, pageSize.width, 110));
 
     List<int> bytes = await document.save();
     document.dispose();
 
     // Generate a unique PDF identifier based on the timestamp
-    final pdfIdentifier = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    final pdfIdentifier =
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
     // Generate a unique PDF file name
     final pdfFileName = '$pdfIdentifier VAIA report.pdf';
@@ -247,7 +243,6 @@ class _ReportState extends State<Report> {
     updateReportItems(pdfIdentifier);
 
     saveAndLaunchFile(bytes, pdfFileName);
-
   }
 
   Future<Uint8List> _readImageData(String name) async {
@@ -265,12 +260,14 @@ class _ReportState extends State<Report> {
     return grid;
   }
 
-  Future<void> uploadPdfToFirebaseStorage(Uint8List pdfBytes, String pdfFileID) async {
+  Future<void> uploadPdfToFirebaseStorage(
+      Uint8List pdfBytes, String pdfFileID) async {
     try {
       final firebase_storage.Reference storageRef = firebase_storage
           .FirebaseStorage.instance
           .ref()
-          .child('reports') // Replace 'your-storage-folder' with your desired folder in Firebase Storage
+          .child(
+              'reports') // Replace 'your-storage-folder' with your desired folder in Firebase Storage
           .child(pdfFileID);
 
       await storageRef.putData(pdfBytes);
@@ -304,57 +301,67 @@ class _ReportState extends State<Report> {
     }
   }
 
-
-
-
   @override
   void initState() {
     super.initState();
-    _processSignal(); // Iniciar el procesamiento de la señal cuando se crea el estado del widget
+
+    // Accede al TimerProvider usando Provider
+    final timerProvider = Provider.of<TimerProvider>(context, listen: false);
+
+    // Escucha los cambios en el temporizador
+    timerProvider.addListener(() {
+      final Duration duration = timerProvider.value;
+      // Verifica si han transcurrido múltiplos de   10 segundos y si ya no has procesado el intervalo
+      if (duration.inSeconds %   10 ==   0 && !_hasProcessed) {
+        _processSignal(totalData, duration); // Procesa la señal cuando han pasado múltiplos de   10 segundos
+        _hasProcessed = true; // Marca que ya has procesado el intervalo
+      } else if (duration.inSeconds %   10 !=   0) {
+        // Si el temporizador no es un múltiplo de  10 segundos, resetea la variable
+        _hasProcessed = false;
+      }
+    });
   }
+
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-
-      body:  Stack(
+      body: Stack(
         children: [
           Container(
-              child: Column(
-                children: [
-                  Container(
-                    color: Colors.purple[100],
-                    child: Column(
-                        children: const [
-                          SizedBox(height: 55.0),
-                          Center(
-                            child: Icon(
-                              Icons.receipt_long_rounded,
-                              color: Colors.white70,
-                              size: 50.0,),
-                          ),
-
-
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.purple[100],
+                  child: Column(
+                    children: const [
+                      SizedBox(height: 55.0),
+                      Center(
+                        child: Icon(
+                          Icons.receipt_long_rounded,
+                          color: Colors.white70,
+                          size: 50.0,
+                        ),
+                      ),
                       SizedBox(height: 10.0),
-
                       Center(
                         child: Text(
                           'Last Report',
                           style: TextStyle(
-                            color: Colors.white,
-                            letterSpacing: 2.0,
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.bold
-                          ),
+                              color: Colors.white,
+                              letterSpacing: 2.0,
+                              fontSize: 30.0,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
-
                       SizedBox(height: 20.0),
-                      ],),),
-
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 50.0),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(60.0,0.0,60.0,0.0),
-                  child: Column( children: [
+                  padding: const EdgeInsets.fromLTRB(60.0, 0.0, 60.0, 0.0),
+                  child: Column(
+                    children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -363,16 +370,14 @@ class _ReportState extends State<Report> {
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                           Text(
                             'AVG. DURATION OF',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                         ],
                       ),
@@ -385,16 +390,14 @@ class _ReportState extends State<Report> {
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                           Text(
                             'CONTRACTIONS (s)',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                         ],
                       ),
@@ -408,15 +411,15 @@ class _ReportState extends State<Report> {
                             width: 140.0,
                             decoration: BoxDecoration(
                                 color: Colors.grey[350],
-                                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
                             child: Center(
                               child: Text(
                                 numContractions,
                                 style: TextStyle(
                                     color: Colors.grey[800],
                                     letterSpacing: 2.0,
-                                    fontSize: 50.0
-                                ),
+                                    fontSize: 50.0),
                               ),
                             ),
                           ),
@@ -425,15 +428,15 @@ class _ReportState extends State<Report> {
                             width: 140.0,
                             decoration: BoxDecoration(
                                 color: Colors.grey[350],
-                                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
                             child: Center(
                               child: Text(
                                 durationValue,
                                 style: TextStyle(
                                     color: Colors.grey[800],
                                     letterSpacing: 2.0,
-                                    fontSize: 50.0
-                                ),
+                                    fontSize: 50.0),
                               ),
                             ),
                           ),
@@ -450,16 +453,14 @@ class _ReportState extends State<Report> {
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                           Text(
                             'CONTRACTIONS',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                         ],
                       ),
@@ -471,16 +472,14 @@ class _ReportState extends State<Report> {
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                           Text(
                             'INTENSITY (mV)',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 12.0
-                            ),
+                                fontSize: 12.0),
                           ),
                         ],
                       ),
@@ -494,15 +493,15 @@ class _ReportState extends State<Report> {
                             width: 140.0,
                             decoration: BoxDecoration(
                                 color: Colors.grey[350],
-                                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
                             child: Center(
                               child: Text(
                                 frequencyValue,
                                 style: TextStyle(
                                     color: Colors.grey[800],
                                     letterSpacing: 2.0,
-                                    fontSize: 50.0
-                                ),
+                                    fontSize: 50.0),
                               ),
                             ),
                           ),
@@ -511,15 +510,15 @@ class _ReportState extends State<Report> {
                             width: 140.0,
                             decoration: BoxDecoration(
                                 color: Colors.grey[350],
-                                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
                             child: Center(
                               child: Text(
                                 intensityValue,
                                 style: TextStyle(
                                     color: Colors.grey[800],
                                     letterSpacing: 2.0,
-                                    fontSize: 50.0
-                                ),
+                                    fontSize: 50.0),
                               ),
                             ),
                           ),
@@ -542,64 +541,74 @@ class _ReportState extends State<Report> {
                       //   ),
                       // ),
 
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 100,
-                          width: 100,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                              height: 100,
+                              width: 100,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple[100],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                ),
+                                child: isGeneratingPDF
+                                    ? SpinKitFadingCircle(
+                                        color: Colors
+                                            .white) // Display a loading indicator while generating
+                                    : Icon(Icons.download_rounded,
+                                        color: Colors.white, size: 40.0),
+                                onPressed:
+                                    (downloadButton == true && !isGeneratingPDF)
+                                        ? () async {
+                                            setState(() {
+                                              isGeneratingPDF = true;
+                                            });
 
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple[100],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                            ),
-                            child: isGeneratingPDF
-                                ? SpinKitFadingCircle(color: Colors.white)// Display a loading indicator while generating
-                                : Icon(Icons.download_rounded, color: Colors.white, size: 40.0),
-                            onPressed: (downloadButton == true && !isGeneratingPDF) ? () async {
-                              setState(() {
-                                isGeneratingPDF = true;
-                              });
+                                            await updateReportsNum();
 
-                              await updateReportsNum();
+                                            // Introduce a slight delay to allow the UI to update
+                                            //await Future.delayed(Duration(milliseconds: 900)); // Adjust the duration as needed
 
-                              // Introduce a slight delay to allow the UI to update
-                              //await Future.delayed(Duration(milliseconds: 900)); // Adjust the duration as needed
+                                            await _createPDF(); // Wait for PDF generation to complete
 
-                              await _createPDF(); // Wait for PDF generation to complete
-
-                              setState(() {
-                                isGeneratingPDF = false;
-                              });
-                            } : null,
-                          )),
-
+                                            setState(() {
+                                              isGeneratingPDF = false;
+                                            });
+                                          }
+                                        : null,
+                              )),
                           const SizedBox(height: 10.0),
-
-                        Text('DOWNLOAD',
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              letterSpacing: 2.0,
-                              fontSize: 15.0),),
-                        Text('REPORT',
-                          style: TextStyle(
-                              color: Colors.grey[700],
-                              letterSpacing: 2.0,
-                              fontSize: 15.0),),
-                      ],),
-
-
+                          Text(
+                            'DOWNLOAD',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 15.0),
+                          ),
+                          Text(
+                            'REPORT',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 15.0),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-              ),
-
-            ],),
-          ),],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
-
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
+// }

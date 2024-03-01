@@ -6,26 +6,31 @@ import 'package:provider/provider.dart';
 import 'pages/timer_provider.dart';
 import 'pages/main_page.dart';
 
-Future main() async{
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  runApp(MaterialApp(home: MyApp(),));
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => TimerProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => GoogleSignInProvider()),
-      ChangeNotifierProvider(create: (_) => TimerProvider()),
-    ],
-    child: MaterialApp(
-      theme: ThemeData(
-        // Set the background color of AlertDialogs to white
-        dialogBackgroundColor: Colors.white,
-      ),
-      home: MainPage(),
-    ),
-  );
+        providers: [
+          ChangeNotifierProvider(create: (_) => GoogleSignInProvider()),
+          ChangeNotifierProvider(create: (_) => TimerProvider()),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(
+            // Set the background color of AlertDialogs to white
+            dialogBackgroundColor: Colors.white,
+          ),
+          home: MainPage(),
+        ),
+      );
 }

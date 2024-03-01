@@ -1,6 +1,7 @@
 import 'package:csv/csv.dart';
 import 'dart:async';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:myapp/pages/bluetooth/BackgroundCollectingTask2.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:iirjdart/butterworth.dart';
@@ -12,26 +13,27 @@ class ReportParam {
   int timeBetween = 0;
   int last10 = 0;
   double intensity = 0;
+  double frequency = 0;
 }
 
-Future<ReportParam> SignalProcessing() async {
-
+Future<ReportParam> SignalProcessing(List<double> measuredData, Duration duration) async {
   List<List<dynamic>> data = [];
   List<dynamic> output;
   ReportParam actualReport = ReportParam();
 
   data = await loadCSV();
 
-  output= await procesarEMG(data);
+  output = await procesarEMG(data, measuredData, duration);
 
   actualReport.number = output[0];
   actualReport.duration = output[1];
   actualReport.timeBetween = output[2];
   actualReport.intensity = output[3];
+  actualReport.frequency = output[4];
+  actualReport.last10 = output[5];
 
   return actualReport;
 }
-
 
 Future<List<List<dynamic>>> loadCSV() async {
   List<List<dynamic>> csvData = [];
@@ -41,58 +43,83 @@ Future<List<List<dynamic>>> loadCSV() async {
   return csvData;
 }
 
+Future<List<dynamic>> procesarEMG(csvData, List<double> data, Duration duration) async {
+  // --------Señales de EMG crudas--------
+  // List<double> emg1 = csvData.map((row) => row[1] as double).toList();
+  List<double> emg2 = csvData.map((row) => row[2]).cast<double>().toList();
 
-Future<List<dynamic>> procesarEMG(csvData) async {
-    // --------Señales de EMG crudas--------
-    // List<double> emg1 = csvData.map((row) => row[1] as double).toList();
-    List<double> emg2 = csvData.map((row) => row[2]).cast<double>().toList();
+  //----------- Calculo la frecuencia----------
+  //Fake freq
+  int samples = emg2.length;
+  double dur = 32.41; // Duration of the recording in minutes
+  double frequency = samples / (dur * 60);
 
-    //----------- Calculo la frecuencia----------
-    int samples = emg2.length;
-    double duration = 32.41; // Duration of the recording in minutes
-    double frequency = samples / (duration * 60);
+  //frequency
+  int totalSamples = data.length;
+  int totalDuration = duration.inSeconds;
+  double frequency2 = totalSamples / totalDuration;
 
-    //------------ Aplicar filtro pasa banda-------------
-    List<double> filteredEmg = filterEmg(emg2);
+  //------------ Aplicar filtro pasa banda-------------
+  List<double> filteredEmg = filterEmg(emg2);
 
-    // ------------Calcular envolvente-------------
-    List<List<double>> envelopeCalc = calculateEnvelope(filteredEmg);
-    List<double> absSignal = envelopeCalc[0];
-    List<double> envelope = envelopeCalc[1];
+  // ------------Calcular envolvente-------------
+  List<List<double>> envelopeCalc = calculateEnvelope(filteredEmg);
+  List<double> absSignal = envelopeCalc[0];
+  List<double> envelope = envelopeCalc[1];
 
-    // ----------Detectar picos y duracion------------
-    List<int> peaks = findPeaks(envelope, 0.05, (40*frequency).round(), frequency);
+  // ----------Detectar picos y duracion------------
+  List<int> peaks =
+      findPeaks(envelope, 0.05, (40 * frequency).round(), frequency);
 
-    int numPeaks = peaks.length;
+  int numPeaks = peaks.length;
 
-    PeakIntervalResult peaksIntervals = peakWidths(envelope, peaks, 0.77, 8000 );
+  PeakIntervalResult peaksIntervals = peakWidths(envelope, peaks, 0.77, 8000);
 
-    int contDuration = (((peaksIntervals.widths).reduce((a,b) => a+b)/peaksIntervals.widths.length)/frequency).round();
+  int contDuration = (((peaksIntervals.widths).reduce((a, b) => a + b) /
+              peaksIntervals.widths.length) /
+          frequency)
+      .round();
 
-    int timeBet = ((peaksIntervals.timeBetweens).reduce((a,b) => a+b)/peaksIntervals.timeBetweens.length).round();
+  int timeBet = ((peaksIntervals.timeBetweens).reduce((a, b) => a + b) /
+          peaksIntervals.timeBetweens.length)
+      .round();
 
-    double sum = 0;
-    for (int i = 0; i < peaks.length ; i++){
-      sum += emg2[peaks[i]];
+  double sum = 0;
+  for (int i = 0; i < peaks.length; i++) {
+    sum += emg2[peaks[i]];
+  }
+
+  double intensity = (sum / (201 * 33.8)) * 1000 / peaks.length;
+
+  //------- # contracciones en los ultimos 10'--------
+  // Calcular el tiempo de inicio de los últimos 10 minutos
+  // int startTimeSeconds = totalDuration - (10 * 60);
+  int startTimeSeconds = (dur*60).toInt() - (10 * 60);
+
+
+  // Filtrar los picos que ocurrieron en los últimos 10 minutos de la señal
+  List<int> filteredPeaks = [];
+  for (int i = 0; i < peaks.length; i++) {
+    if (peaks[i] * (1 / frequency) >= startTimeSeconds) {
+      filteredPeaks.add(peaks[i]);
     }
+  }
+  // Contar el número de picos filtrados
+  int last10 = filteredPeaks.length;
 
-    double intensity = (sum / (201 * 33.8))*1000/peaks.length;
-    print('intensity: $intensity');
+  List<dynamic> output = [];
 
-    List<dynamic> output=[];
+  output.add(numPeaks);
+  output.add(contDuration);
+  output.add(timeBet);
+  output.add(intensity);
+  output.add(frequency2);
+  output.add(last10);
 
-    output.add(numPeaks);
-    output.add(contDuration);
-    output.add(timeBet);
-    output.add(intensity);
-
-    return output;
+  return output;
 }
 
-
-
 List<double> filterEmg(List<double> emgSignal) {
-
   double sampleRate = 50.0; // Frecuencia de muestreo
   double centerFrequency = 0.6; // Frecuencia central del filtro pasa banda
   double widthFrequency = 0.8; // Ancho del filtro pasa banda
@@ -101,16 +128,15 @@ List<double> filterEmg(List<double> emgSignal) {
   butterworth.bandPass(2, sampleRate, centerFrequency, widthFrequency);
 
   List<double> filteredData = [];
-  for(var v in emgSignal) {
+  for (var v in emgSignal) {
     filteredData.add(butterworth.filter(v));
   }
-
-  print("filtered data: $filteredData");
 
   return filteredData;
 }
 
-List<List<double>> calculateEnvelope(List<double> signal, {double cutoffFreq = 0.0166}) {
+List<List<double>> calculateEnvelope(List<double> signal,
+    {double cutoffFreq = 0.0166}) {
   // Calcular el valor absoluto
   List<double> absSignal = signal.map((value) => value.abs()).toList();
 
@@ -125,11 +151,11 @@ List<List<double>> calculateEnvelope(List<double> signal, {double cutoffFreq = 0
   butterworth.lowPass(1, fs, normalCutoff);
 
   // Aplicar el filtro a la señal absoluta
-  List<double> envelope = absSignal.map((value) => butterworth.filter(value)).toList();
+  List<double> envelope =
+      absSignal.map((value) => butterworth.filter(value)).toList();
 
   return [absSignal, envelope];
 }
-
 
 class Peak {
   int index;
@@ -138,7 +164,8 @@ class Peak {
   Peak(this.index, this.width);
 }
 
-List<int> findPeaks(List<double> data, double minHeight, int minDistance, double frequency) {
+List<int> findPeaks(
+    List<double> data, double minHeight, int minDistance, double frequency) {
   List<int> peakIndex = [];
 
   if (data.length < 3 || minDistance < 1) {
@@ -180,7 +207,8 @@ class PeakIntervalResult {
   PeakIntervalResult(this.widths, this.timeBetweens);
 }
 
-PeakIntervalResult peakWidths(List<double> signal, List<int> peaks, double relHeight, int wlen) {
+PeakIntervalResult peakWidths(
+    List<double> signal, List<int> peaks, double relHeight, int wlen) {
   List<int> widths = [];
   List<int> timeBetweens = [];
   //List<double> prominences = [];
@@ -194,7 +222,8 @@ PeakIntervalResult peakWidths(List<double> signal, List<int> peaks, double relHe
     double peakProminence = calculatePeakProminence(signal, peakIndex, wlen);
 
     // Calcular la anchura
-    List<int> intervalParam = calculatePeakWidth(signal, peakIndex, peakValue, peakProminence, relHeight);
+    List<int> intervalParam = calculatePeakWidth(
+        signal, peakIndex, peakValue, peakProminence, relHeight);
 
     int width = intervalParam[0];
     int currentLeftIndex = intervalParam[1];
@@ -218,12 +247,16 @@ double calculatePeakProminence(List<double> signal, int peakIndex, int wlen) {
 
   // Extender una línea horizontal desde el pico hacia la izquierda y la derecha
   int leftIndex = peakIndex;
-  while (leftIndex > 0 && peakIndex - leftIndex < wlen && signal[leftIndex - 1] < peakValue) {
+  while (leftIndex > 0 &&
+      peakIndex - leftIndex < wlen &&
+      signal[leftIndex - 1] < peakValue) {
     leftIndex--;
   }
 
   int rightIndex = peakIndex;
-  while (rightIndex < signal.length - 1 && rightIndex - peakIndex < wlen && signal[rightIndex + 1] < peakValue) {
+  while (rightIndex < signal.length - 1 &&
+      rightIndex - peakIndex < wlen &&
+      signal[rightIndex + 1] < peakValue) {
     rightIndex++;
   }
 
@@ -237,7 +270,8 @@ double calculatePeakProminence(List<double> signal, int peakIndex, int wlen) {
   return prominence;
 }
 
-List<int> calculatePeakWidth(List<double> signal, int peakIndex, double peakValue, double peakProminence, double relHeight) {
+List<int> calculatePeakWidth(List<double> signal, int peakIndex,
+    double peakValue, double peakProminence, double relHeight) {
   double evaluationHeight = peakValue - relHeight * peakProminence;
 
   // Encontrar el índice del punto más bajo a la izquierda
@@ -248,7 +282,8 @@ List<int> calculatePeakWidth(List<double> signal, int peakIndex, double peakValu
 
   // Encontrar el índice del punto más bajo a la derecha
   int rightIndex = peakIndex;
-  while (rightIndex < signal.length - 1 && signal[rightIndex + 1] >= evaluationHeight) {
+  while (rightIndex < signal.length - 1 &&
+      signal[rightIndex + 1] >= evaluationHeight) {
     rightIndex++;
   }
 
@@ -257,13 +292,8 @@ List<int> calculatePeakWidth(List<double> signal, int peakIndex, double peakValu
 
   List<int> parameters = [width, leftIndex, rightIndex];
 
-
   return parameters;
 }
-
-
-
-
 
 Future<void> saveCSVFile(List<double> csvData) async {
   List<List<dynamic>> csvContent = [];
@@ -283,7 +313,3 @@ Future<void> saveCSVFile(List<double> csvData) async {
 
   print('CSV file for plots saved: ${file.path}');
 }
-
-
-
-

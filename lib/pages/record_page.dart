@@ -17,13 +17,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class Record extends StatefulWidget {
+  // final TimerProvider timerProvider;
+  // const Record({Key? key, required this.timerProvider}): super(key: key);
   @override
   _Record createState() => new _Record();
 
 }
 
 bool stopButton = false;
-// class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;    //definimos el estado inicial como unknown
@@ -46,6 +47,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
   bool showPainLevelInput = false;
   int painLevel = 0; // Variable to store the pain level
+
 
   @override
   void initState() {
@@ -181,10 +183,10 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
+    final timerProvider = Provider.of<TimerProvider>(context);
     super.build(context);
-    return Consumer<TimerProvider>(
-        builder: (context, timerProvider, _)
-    {return Scaffold(
+    {
+      return Scaffold(
         backgroundColor: Colors.purple[100],
         body: SafeArea(
           child: Column(children: [
@@ -583,6 +585,14 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                   stopButton = true;
                                   //downloadButton = false;
                                   timerProvider.start();
+                                  // timerProvider.addListener(() {
+                                  //   final Duration duration = timerProvider.value;
+                                  //   // Verifica si han transcurrido dos minutos (120 segundos)
+                                  //   // print('duration: $duration');
+                                  //   if (duration.inSeconds >= 10) {
+                                  //     print('TIMERRRRRRRRRRRRRRRRRRRRRRRR');
+                                  //   }
+                                  // });
                                   setState(() {});
                                 } : null,
                               ),),
@@ -672,7 +682,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
           ],),
         ),
       );
-    });
+    };
   }
 
 
@@ -718,7 +728,6 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
     print('CSV file with data and pain level saved at: ${file.path}');
   }
 
-
   Future<void> _startBackgroundTask(
       BuildContext context,
       BluetoothDevice server,
@@ -746,7 +755,6 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
         },
       );
     }
-
   }
 
   Future <void> deleteData() async{
