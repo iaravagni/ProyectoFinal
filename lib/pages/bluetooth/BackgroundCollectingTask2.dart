@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
-
+import '../signal_processing.dart';
 
 List<double> totalData = [];
 
@@ -78,6 +78,14 @@ class BackgroundCollectingTask extends Model {
   Future<void> start() async {
     print("entre al start");
     totalData.clear();
+    totalDataEmg1.clear();
+    totalDataEmg2.clear();
+    lastSampleIndex = 0;
+    lastSampleDuration = Duration(seconds: 0);
+    totalPeaks.clear();
+    totalPeaksWidths.clear();
+    totalPeaksIntensity.clear();
+
     inProgress = true;
     notifyListeners();
     _connection.output.add(ascii.encode('start'));

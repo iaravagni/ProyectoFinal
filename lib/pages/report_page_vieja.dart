@@ -31,16 +31,13 @@ class _ReportState extends State<Report> {
   String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String patientAge = actualUser.age;
   String weeksPregnant = actualUser.weeks;
-  String durationValue = '10';
-  String frequencyValue = '2';
-  String intensityValue = '0.55';
-  String numContractions = '3';
+  String durationValue = '-';
+  String frequencyValue = '-';
+  String intensityValue = '-';
+  String numContractions = '-';
   String measurementDuration = '20 seconds'; //todo: Actualizar
 
   String lastUpdate = '-';
-
-  bool shouldAttendHealthcareCenter = false; // Variable booleana para indicar si se debe asistir al centro de salud o quedarse en casa
-
 
   // Método asincrónico para procesar la señal
   Future<void> _processSignal(List<double> totalData, Duration duration) async {
@@ -383,31 +380,138 @@ class _ReportState extends State<Report> {
                 ),
                 const SizedBox(height: 50.0),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(45.0, 0.0, 45.0, 0.0),
+                  padding: const EdgeInsets.fromLTRB(60.0, 0.0, 60.0, 0.0),
                   child: Column(
                     children: [
-                      Column(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'NUMBER OF CONTRACTIONS',
+                            'TOTAL NUMBER',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 14.0),
+                                fontSize: 12.0),
                           ),
                           Text(
-                            'IN THE LAST 10 MINUTES',
+                            'AVG. DURATION OF',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 14.0),
+                                fontSize: 12.0),
                           ),
+                        ],
+                      ),
 
-                          const SizedBox(height: 10.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'OF CONTRACTIONS',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 12.0),
+                          ),
+                          Text(
+                            'CONTRACTIONS (s)',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 12.0),
+                          ),
+                        ],
+                      ),
 
+                      const SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
                           Container(
-                            height: 84.0,
-                            width: 500.0,
+                            height: 120.0,
+                            width: 140.0,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[350],
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
+                            child: Center(
+                              child: Text(
+                                numContractions,
+                                style: TextStyle(
+                                    color: Colors.grey[800],
+                                    letterSpacing: 2.0,
+                                    fontSize: 50.0),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 120.0,
+                            width: 140.0,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[350],
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
+                            child: Center(
+                              child: Text(
+                                durationValue,
+                                style: TextStyle(
+                                    color: Colors.grey[800],
+                                    letterSpacing: 2.0,
+                                    fontSize: 50.0),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 30.0),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'CONTRACTIONS IN',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 12.0),
+                          ),
+                          Text(
+                            'CONTRACTIONS',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 12.0),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'THE LAST 10 MIN',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 12.0),
+                          ),
+                          Text(
+                            'INTENSITY (mV)',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                letterSpacing: 2.0,
+                                fontSize: 12.0),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            height: 120.0,
+                            width: 140.0,
                             decoration: BoxDecoration(
                                 color: Colors.grey[350],
                                 borderRadius: const BorderRadius.all(
@@ -422,134 +526,26 @@ class _ReportState extends State<Report> {
                               ),
                             ),
                           ),
+                          Container(
+                            height: 120.0,
+                            width: 140.0,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[350],
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(20.0))),
+                            child: Center(
+                              child: Text(
+                                intensityValue,
+                                style: TextStyle(
+                                    color: Colors.grey[800],
+                                    letterSpacing: 2.0,
+                                    fontSize: 50.0),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-
-                      const SizedBox(height: 20.0),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                'TOTAL',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    letterSpacing: 2.0,
-                                    fontSize: 11.0),
-                              ),
-                              Text(
-                                'CONTRACTIONS',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    letterSpacing: 2.0,
-                                    fontSize: 10.0),
-                              ),
-
-                              const SizedBox(height: 5.0),
-
-                              Container(
-                                height: 84.0,
-                                width: 98.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[350],
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0))),
-                                child: Center(
-                                  child: Text(
-                                    numContractions,
-                                    style: TextStyle(
-                                        color: Colors.grey[800],
-                                        letterSpacing: 2.0,
-                                        fontSize: 40.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                'AVERAGE',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    letterSpacing: 2.0,
-                                    fontSize: 11.0),
-                              ),
-                              Text(
-                                'INTENSITY (mA)',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    letterSpacing: 2.0,
-                                    fontSize: 10.0),
-                              ),
-
-                              const SizedBox(height: 5.0),
-
-                              Container(
-                                height: 84.0,
-                                width: 98.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[350],
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0))),
-                                child: Center(
-                                  child: Text(
-                                    intensityValue,
-                                    style: TextStyle(
-                                        color: Colors.grey[800],
-                                        letterSpacing: 2.0,
-                                        fontSize: 40.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                'AVERAGE',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    letterSpacing: 2.0,
-                                    fontSize: 11.0),
-                              ),
-                              Text(
-                                'DURATION (s)',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    letterSpacing: 2.0,
-                                    fontSize: 10.0),
-                              ),
-
-                              const SizedBox(height: 5.0),
-
-                              Container(
-                                height: 84.0,
-                                width: 98.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[350],
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0))),
-                                child: Center(
-                                  child: Text(
-                                    durationValue,
-                                    style: TextStyle(
-                                        color: Colors.grey[800],
-                                        letterSpacing: 2.0,
-                                        fontSize: 40.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-
-
-                      const SizedBox(height: 10.0),
-
+                      const SizedBox(height: 5.0),
 
                       Text(
                         'Last update: $lastUpdate',
@@ -557,115 +553,32 @@ class _ReportState extends State<Report> {
                             color: Colors.grey[700],
                             letterSpacing: 1.5,
                             fontStyle: FontStyle.italic,
-                            fontSize: 12.0),
+                            fontSize: 15.0),
                       ),
 
-
-                      const SizedBox(height: 35.0),
-
-
-
-                      Container(
-                      width: double.infinity, // Asegura que el contenedor ocupe todo el ancho
-                        height: 1.5,
-                        color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
-                      ),
-
-                      const SizedBox(height: 20.0),
-
-                      Text(
-                        'Suggestion:',
-                        style: TextStyle(
-                          color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
-                          letterSpacing: 1.5,
-                          fontStyle: FontStyle.italic,
-                          fontSize: 12.0,
-                        ),
-                      ),
-
-                      Text(
-                        shouldAttendHealthcareCenter ? 'ATTEND HEALTHCARE CENTER' : 'STAY AT HOME', // Cambia el texto según el valor de la variable booleana
-                        style: TextStyle(
-                          color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                          fontSize: 20.0,
-                        ),
-                      ),
-
-                      const SizedBox(height: 20.0),
-
-                      Container(
-                        width: double.infinity, // Asegura que el contenedor ocupe todo el ancho
-                        height: 1.5,
-                        color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
-                      ),
-
-
-
-          //
-                      //
-                      //
-                      // Container(
-                      //   width: double.infinity, // Ensure the container takes the full width
-                      //   height: 1.5,
-                      //   color: Color(0xFF4A2574), // Set the color of the the line
-                      // ),
-                      //
-                      // const SizedBox(height: 20.0),
-                      //
-                      // Text(
-                      //   'Suggestion:',
-                      //   style: TextStyle(
-                      //       color: Color(0xFF4A2574), // Set the color of the the line
-                      //       letterSpacing: 1.5,
-                      //       fontStyle: FontStyle.italic,
-                      //       fontSize: 12.0),
-                      // ),
-                      //
-                      // Text(
-                      //   'ATTEND HEALTHCARE CENTER',
-                      //   style: TextStyle(
-                      //       // color: Colors.deepPurpleAccent[900], // Set the color of the line
-                      //       color: Color(0xFF4A2574), // Set the color of the the line
-                      //       fontWeight: FontWeight.bold,
-                      //       letterSpacing: 1.5,
-                      //       fontSize: 20.0),
-                      // ),
-                      //
-                      // const SizedBox(height: 20.0),
-                      //
-                      //
-                      // Container(
-                      //   width: double.infinity, // Ensure the container takes the full width
-                      //   height: 1.5,
-                      //   color: Color(0xFF4A2574), // Set the color of the the line// Adjust the height of the line
-                      // ),
-
-
-
-                      const SizedBox(height: 35.0),
+                      const SizedBox(height: 25.0),
 
 
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                              height: 80,
-                              width: 80,
+                              height: 100,
+                              width: 100,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.purple[100],
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(80),
+                                    borderRadius: BorderRadius.circular(100),
                                   ),
                                 ),
                                 child: isGeneratingPDF
                                     ? SpinKitFadingCircle(
-                                        color: Colors.white, size: 30) // Display a loading indicator while generating
+                                        color: Colors
+                                            .white) // Display a loading indicator while generating
                                     // : Icon(Icons.download_rounded,
                                     //     color: Colors.white, size: 40.0),
-                                : Icon(Icons.download_rounded, size: 30.0, color: downloadButton ? Colors.white : null),
+                                : Icon(Icons.download_rounded, size: 40.0, color: downloadButton ? Colors.white : null),
                                 onPressed:
                                     (downloadButton == true && !isGeneratingPDF)
                                         ? () async {
@@ -694,14 +607,14 @@ class _ReportState extends State<Report> {
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 13.0),
+                                fontSize: 15.0),
                           ),
                           Text(
                             'REPORT',
                             style: TextStyle(
                                 color: Colors.grey[700],
                                 letterSpacing: 2.0,
-                                fontSize: 13.0),
+                                fontSize: 15.0),
                           ),
                         ],
                       ),

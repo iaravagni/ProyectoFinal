@@ -16,6 +16,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 
+import 'report_page.dart';
+
 class Record extends StatefulWidget {
   // final TimerProvider timerProvider;
   // const Record({Key? key, required this.timerProvider}): super(key: key);
@@ -583,16 +585,8 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                   await _startRecording();
                                   startButton = false;
                                   stopButton = true;
-                                  //downloadButton = false;
+                                  downloadButton = false;
                                   timerProvider.start();
-                                  // timerProvider.addListener(() {
-                                  //   final Duration duration = timerProvider.value;
-                                  //   // Verifica si han transcurrido dos minutos (120 segundos)
-                                  //   // print('duration: $duration');
-                                  //   if (duration.inSeconds >= 10) {
-                                  //     print('TIMERRRRRRRRRRRRRRRRRRRRRRRR');
-                                  //   }
-                                  // });
                                   setState(() {});
                                 } : null,
                               ),),
@@ -626,14 +620,16 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                     )),
                                 child: Icon(Icons.stop_rounded, size: 40.0, color: stopButton ? Colors.white : null),
                                 onPressed: (stopButton == true) ? () async {
+                                  timerProvider.stop();
+
                                   await _stopRecording();
-                                  await saveCSVFile(totalData, painLevel);
+                                  await saveCSVFile(totalData, painLevel, timerProvider.formatTime());
                                   newRecButton = true;
                                   stopButton = false;
                                   //newRecButton = true;
                                   startButton = false;
-                                  //downloadButton = true;
-                                  timerProvider.stop();
+                                  downloadButton = true;
+
                                   //initState();
                                   setState(() {});
                                 } : null,
@@ -696,17 +692,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
   }
 
 
-  // Future<void> saveCSVFile(List<double> csvData) async {
-  //   final csvContent = csvData.map((value) => [value]).toList();
-  //
-  //   final Directory? directory = await getExternalStorageDirectory();
-  //   final file = File('${directory?.path}/${DateTime.now()} - Medicion EHG.csv');
-  //   await file.writeAsString(const ListToCsvConverter().convert(csvContent));
-  //
-  //   print('CSV file saved in the internal memory at: ${file.path}');
-  // }
-
-  Future<void> saveCSVFile(List<double> csvData, int painLevel) async {
+  Future<void> saveCSVFile(List<double> csvData, int painLevel, String duration) async {
     final List<List<dynamic>> csvContent = [];
 
     for (int i = 0; i < csvData.length; i += 2) {
@@ -714,6 +700,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
         painLevel,
         csvData[i],
         csvData[i + 1],
+        duration,
 
       ];
       csvContent.add(row);
@@ -764,6 +751,7 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
       await doc.reference.delete();
     }
   }
+
 
   @override
   bool get wantKeepAlive => true;

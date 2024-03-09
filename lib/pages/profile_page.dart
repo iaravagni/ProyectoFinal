@@ -146,7 +146,7 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(height: 90.0),
 
                       Padding(
-                        padding: const EdgeInsets.only(left: 60.0, right: 60.0),
+                        padding: const EdgeInsets.only(left: 45.0, right: 45.0),
                         child: Column(
                           children: [
                             Row(
@@ -194,7 +194,7 @@ class _ProfileState extends State<Profile> {
                               ],
                             ),
 
-                            const SizedBox(height: 15.0),
+                            const SizedBox(height: 10.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -282,7 +282,7 @@ class _ProfileState extends State<Profile> {
                               ],
                             ),
 
-                            const SizedBox(height: 15.0),
+                            const SizedBox(height: 10.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

@@ -16,21 +16,161 @@ class ReportParam {
   double frequency = 0;
 }
 
-Future<ReportParam> SignalProcessing(List<double> measuredData, Duration duration) async {
+List<double> totalDataEmg1 = [];
+List<double> totalDataEmg2 = [];
+int lastSampleIndex = 0; // Me quedo con la ultima muestra que procese
+Duration lastSampleDuration = Duration(seconds: 0);
+List<dynamic> totalPeaks = [];
+List<dynamic> totalPeaksWidths = [];
+List<dynamic> totalPeaksIntensity = [];
+
+Future<ReportParam> SignalProcessing(
+    List<double> measuredData, Duration duration) async {
   List<List<dynamic>> data = [];
+  // data = await loadCSV();
+  // List<double> emg2 = data.map((row) => row[2]).cast<double>().toList();
+
+  // int samples = emg2.length;
+  // double dur = 32.41; // Duration of the recording in minutes
+  // double frequency = samples / (dur * 60);
+
+  // int window = (180 * frequency).toInt();
+  // int overlapping = (60 * frequency).toInt();
+  // List<double> windowData;
+  // List<dynamic> windowOutput;
+  // List<dynamic> picosTotales = [];
+  // List<int> filteredList = [];
+  //
+  // for (int i = 0; i < emg2.length; i += window - overlapping) {
+  //   if (i == 0) {
+  //     windowData = emg2.sublist(i, window - overlapping);
+  //     windowOutput =
+  //         await procesarEMG(data, windowData, Duration(seconds: 120));
+  //     for (int pico in windowOutput[0]) {
+  //         picosTotales.add(pico + i);
+  //     }
+  //     // picosTotales.addAll(windowOutput[0]);
+  //     print('Ventana: $i hasta ${window - overlapping}');
+  //     print('Pico parcial ${windowOutput[0]}');
+  //     print('Length EMG 2: ${emg2.length}');
+  //     i -= overlapping;
+  //   } else {
+  //     if (i + window >= emg2.length) {
+  //       print('VENTANA FINAL');
+  //       // print('i FINAL: $i');
+  //       // windowData = emg2.sublist(i);
+  //       // print('HOLAAA ${((emg2.length - i)/frequency).toInt()}');
+  //       // windowOutput = await procesarEMG(data, windowData, Duration(seconds:((emg2.length - i)/frequency).toInt()));
+  //       // print('HOLAAA2222');
+  //     } else {
+  //       windowData = emg2.sublist(i, i + window);
+  //       windowOutput =
+  //           await procesarEMG(data, windowData, Duration(seconds: 180));
+  //       for (int pico in windowOutput[0]) {
+  //           picosTotales.add(pico + i);
+  //       }
+  //       // picosTotales.addAll(windowOutput[0]);
+  //       print('Ventana: $i hasta ${i + window}');
+  //       print('Pico parcial ${windowOutput[0]}');
+  //     }
+  //     print('Picos totales: $picosTotales');
+  //     picosTotales = picosTotales.toSet().toList();
+  //
+  //     for (int i = 0; i < picosTotales.length; i++) {
+  //       if (filteredList.isEmpty || picosTotales[i] - 1000 > filteredList.last) {
+  //         // Agregar el elemento actual si la lista filtrada está vacía o si el elemento actual está más lejos de 200 (5s) unidades del último elemento en la lista filtrada
+  //         filteredList.add(picosTotales[i]);
+  //       }
+  //     }
+  //     print('Picos totales filtrados: ${filteredList}');
+  //   }
+  // }
+  //
+  // // print('Picos Totales $picosTotales');
+  // print('Picos Totales ${filteredList.length}');
   List<dynamic> output;
+
+  int samples = measuredData.length;
+  double frequency = (samples / (duration.inSeconds))/2;
+  int overlapping = (60*frequency).toInt();
+
+  List<double> windowData = measuredData.sublist(lastSampleIndex == 0 ? lastSampleIndex : lastSampleIndex - overlapping);
+  totalDataSplit(windowData);
+
+  List<double> windowDataEmg1 = totalDataEmg1.sublist(lastSampleIndex == 0 ? lastSampleIndex : lastSampleIndex - overlapping);
+  output = await procesarEMG(data, windowDataEmg1, duration-lastSampleDuration);
+
+
+  for (int i = 0; i < output[0].length; i++) {
+    if (totalPeaks.isEmpty || output[0][i] - 1000 > totalPeaks.last) { // picos iguales +- 1000 muestras
+      // Agregar el elemento actual si la lista filtrada está vacía o si el elemento actual está más lejos de 200 (5s) unidades del último elemento en la lista filtrada
+      int currentPeakIndex = output[0][i] + (lastSampleIndex == 0 ? lastSampleIndex : lastSampleIndex - overlapping);
+      totalPeaks.add(currentPeakIndex);
+      totalPeaksWidths.add(output[1].width[i]);
+      totalPeaksIntensity.add(totalDataEmg1[currentPeakIndex]);
+    }
+  }
+
+  // Me quedo con la ultima muestra que procese
+  lastSampleIndex = (totalDataEmg1.length - 1);
+  lastSampleDuration = duration;
+
+  //---------widths--------
+  // int timeBet = 0;
+  int avgDuration = 0;
+
+  if (totalPeaksWidths.length > 0) {
+    avgDuration = (((totalPeaksWidths).reduce((a, b) =>
+    a + b) / // calcula la duracion promedio de las contracciones
+        totalPeaksWidths.length))
+        .round();
+
+    // timeBet = ((output[1].timeBetweens).reduce((a, b) => a + b) /
+    //     output[1].timeBetweens.length)
+    //     .round();
+  }
+
+  //-----intensidad-------
+  double avgIntensity = 0;
+
+  if (totalPeaksIntensity.length > 0) {
+    avgIntensity = (((totalPeaksIntensity).reduce((a, b) =>
+    a + b) / // calcula la duracion promedio de las contracciones
+        totalPeaksIntensity.length))
+        .round();
+    avgIntensity = (avgIntensity / (201 * 33.8)) * 1000; //intensidad a mA
+  }
+
+  // //------- # contracciones en los ultimos 10'--------
+
+  List<dynamic> outputLast10 = [];
+
+  // // Calcular el tiempo de inicio de los últimos 10 minutos
+  if (duration.inSeconds >= 10*60) {
+    int startIndex = ((duration.inSeconds - (10 * 60)) * frequency).toInt();
+    List<double> windowDataEmg1Last10 = totalDataEmg1.sublist(startIndex);
+    outputLast10 =
+    await procesarEMG(data, windowDataEmg1Last10, Duration( seconds: 10*60));
+  }
+
+  // // Filtrar los picos que ocurrieron en los últimos 10 minutos de la señal
+  // List<int> filteredPeaks = [];
+  // for (int i = 0; i < peaks.length; i++) {
+  //   if (peaks[i] * (1 / frequency2) >= startTimeSeconds) {
+  //     filteredPeaks.add(peaks[i]);
+  //   }
+  // }
+  // // Contar el número de picos filtrados
+  // int last10 = filteredPeaks.length;
+
   ReportParam actualReport = ReportParam();
 
-  data = await loadCSV();
-
-  output = await procesarEMG(data, measuredData, duration);
-
-  actualReport.number = output[0];
-  actualReport.duration = output[1];
-  actualReport.timeBetween = output[2];
-  actualReport.intensity = output[3];
-  actualReport.frequency = output[4];
-  actualReport.last10 = output[5];
+  actualReport.number = totalPeaks.length;
+  actualReport.duration = avgDuration;
+  // actualReport.timeBetween = output[2];
+  actualReport.intensity = avgIntensity;
+  // actualReport.frequency = output[4];
+  actualReport.last10 = outputLast10.length;
 
   return actualReport;
 }
@@ -43,78 +183,60 @@ Future<List<List<dynamic>>> loadCSV() async {
   return csvData;
 }
 
-Future<List<dynamic>> procesarEMG(csvData, List<double> data, Duration duration) async {
+Future<List<dynamic>> procesarEMG(
+    csvData, List<double> data, Duration duration) async {
   // --------Señales de EMG crudas--------
   // List<double> emg1 = csvData.map((row) => row[1] as double).toList();
-  List<double> emg2 = csvData.map((row) => row[2]).cast<double>().toList();
+  // List<double> emg2 = csvData.map((row) => row[2]).cast<double>().toList();
 
   //----------- Calculo la frecuencia----------
   //Fake freq
-  int samples = emg2.length;
-  double dur = 32.41; // Duration of the recording in minutes
-  double frequency = samples / (dur * 60);
+  // int samples = emg2.length;
+  // double dur = 32.41; // Duration of the recording in minutes
+  // double frequency2 = samples / (dur * 60);
 
   //frequency
   int totalSamples = data.length;
-  int totalDuration = duration.inSeconds;
-  double frequency2 = totalSamples / totalDuration;
+  double frequency = totalSamples / duration.inSeconds;
 
   //------------ Aplicar filtro pasa banda-------------
-  List<double> filteredEmg = filterEmg(emg2);
+  // List<double> filteredEmg = filterEmg(emg2);
+  List<double> filteredEmg = filterEmg(data);
 
   // ------------Calcular envolvente-------------
   List<List<double>> envelopeCalc = calculateEnvelope(filteredEmg);
-  List<double> absSignal = envelopeCalc[0];
+  // List<double> absSignal = envelopeCalc[0];
   List<double> envelope = envelopeCalc[1];
 
   // ----------Detectar picos y duracion------------
   List<int> peaks =
       findPeaks(envelope, 0.05, (40 * frequency).round(), frequency);
 
-  int numPeaks = peaks.length;
-
-  PeakIntervalResult peaksIntervals = peakWidths(envelope, peaks, 0.77, 8000);
-
-  int contDuration = (((peaksIntervals.widths).reduce((a, b) => a + b) /
-              peaksIntervals.widths.length) /
-          frequency)
-      .round();
-
-  int timeBet = ((peaksIntervals.timeBetweens).reduce((a, b) => a + b) /
-          peaksIntervals.timeBetweens.length)
-      .round();
-
-  double sum = 0;
-  for (int i = 0; i < peaks.length; i++) {
-    sum += emg2[peaks[i]];
+  if (peaks.length > 0 && peaks[peaks.length -1] == data.length-1){
+    peaks.removeLast();
   }
 
-  double intensity = (sum / (201 * 33.8)) * 1000 / peaks.length;
+  PeakIntervalResult peaksIntervals = peakWidths(envelope, peaks, 0.77, envelope.length, frequency);
 
-  //------- # contracciones en los ultimos 10'--------
-  // Calcular el tiempo de inicio de los últimos 10 minutos
-  // int startTimeSeconds = totalDuration - (10 * 60);
-  int startTimeSeconds = (dur*60).toInt() - (10 * 60);
+  List<int> indicesAEliminar = [];
 
-
-  // Filtrar los picos que ocurrieron en los últimos 10 minutos de la señal
-  List<int> filteredPeaks = [];
-  for (int i = 0; i < peaks.length; i++) {
-    if (peaks[i] * (1 / frequency) >= startTimeSeconds) {
-      filteredPeaks.add(peaks[i]);
+  for (int i = 0; i < peaksIntervals.widths.length; i++) {
+    if (35 > peaksIntervals.widths[i] || peaksIntervals.widths[i] > 180) {
+      indicesAEliminar.add(i);
     }
   }
-  // Contar el número de picos filtrados
-  int last10 = filteredPeaks.length;
+
+  for (int i = indicesAEliminar.length - 1; i >= 0; i--) {
+    int indice = indicesAEliminar[i];
+    peaks.removeAt(indice);
+    peaksIntervals.widths.removeAt(indice);
+    peaksIntervals.timeBetweens.removeAt(indice);
+  }
 
   List<dynamic> output = [];
 
-  output.add(numPeaks);
-  output.add(contDuration);
-  output.add(timeBet);
-  output.add(intensity);
-  output.add(frequency2);
-  output.add(last10);
+  output.add(peaks);
+  output.add(peaksIntervals);
 
   return output;
 }
@@ -207,8 +329,7 @@ class PeakIntervalResult {
   PeakIntervalResult(this.widths, this.timeBetweens);
 }
 
-PeakIntervalResult peakWidths(
-    List<double> signal, List<int> peaks, double relHeight, int wlen) {
+PeakIntervalResult peakWidths(List<double> signal, List<int> peaks, double relHeight, int wlen, double frequency) {
   List<int> widths = [];
   List<int> timeBetweens = [];
   //List<double> prominences = [];
@@ -234,7 +355,7 @@ PeakIntervalResult peakWidths(
     prevRightIndex = currentRightIndex;
 
     // Almacenar los resultados
-    widths.add(width);
+    widths.add((width/frequency).toInt());
     timeBetweens.add(timeBetween);
     //prominences.add(peakProminence);
   }
@@ -312,4 +433,13 @@ Future<void> saveCSVFile(List<double> csvData) async {
   await file.writeAsString(csvFileContent);
 
   print('CSV file for plots saved: ${file.path}');
+}
+
+void totalDataSplit (data) {
+  print('holasss');
+  for (int i = 0; i < data.length -1; i += 2) {
+    totalDataEmg1.add(data[i]);
+    totalDataEmg2.add(data[i+1]);
+  }
+  print('holasss');
 }

@@ -36,10 +36,6 @@ class _NavigationState extends State<Navigation> {
               (UserData s) => setState((){
               actualUser = s;
           }));
-      // getReportName(actualUser.uid).then(
-      //         (List<String> r) => setState((){
-      //         reportItems = r;
-      //         }));
     }
   }
 
@@ -68,19 +64,8 @@ class _NavigationState extends State<Navigation> {
       ),
       body: PageView(
         controller: pageController,
-        // children: [
-        //   Profile(updateSelectedIndex),
-        //   Consumer<TimerProvider>(
-        //     builder: (context, timerProvider, child) => Record(timerProvider: timerProvider),
-        //   ),
-        //   // Plot(plotButton: stopButton,),
-        //   Consumer<TimerProvider>(
-        //     builder: (context, timerProvider, child) => Report(timerProvider: timerProvider),
-        //   ),
-        //   History(),
         children: [
           Profile(updateSelectedIndex),
-          // No necesitas pasar el TimerProvider aquí
           Record(),
           // Plot(plotButton: stopButton,),
           Report(),
