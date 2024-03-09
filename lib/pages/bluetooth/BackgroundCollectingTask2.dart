@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../signal_processing.dart';
+import '../report_page.dart';
 
 List<double> totalData = [];
 
@@ -85,6 +86,16 @@ class BackgroundCollectingTask extends Model {
     totalPeaks.clear();
     totalPeaksWidths.clear();
     totalPeaksIntensity.clear();
+
+    durationValue = '-';
+    frequencyValue = '-';
+    intensityValue = '-';
+    numContractions = '-';
+
+    lastUpdate = '-';
+
+    lastSecond = 0;
+
 
     inProgress = true;
     notifyListeners();

@@ -16,6 +16,29 @@ import 'signal_processing.dart';
 
 bool downloadButton = false;
 
+String durationValue = '-';
+String frequencyValue = '-';
+String intensityValue = '-';
+String numContractions = '-';
+
+String lastUpdate = '-';
+
+int lastSecond = 0;
+
+class RecordObject {
+  final Duration start;
+  final Duration end;
+  final Duration duration;
+  final int intensity;
+
+  RecordObject({
+    required this.start,
+    required this.end,
+    required this.duration,
+    required this.intensity,
+  });
+}
+
 class Report extends StatefulWidget {
   @override
   State<Report> createState() => _ReportState();
@@ -31,16 +54,6 @@ class _ReportState extends State<Report> {
   String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String patientAge = actualUser.age;
   String weeksPregnant = actualUser.weeks;
-  String durationValue = '10';
-  String frequencyValue = '2';
-  String intensityValue = '0.55';
-  String numContractions = '3';
-  String measurementDuration = '20 seconds'; //todo: Actualizar
-
-  String lastUpdate = '-';
-
-  bool shouldAttendHealthcareCenter = false; // Variable booleana para indicar si se debe asistir al centro de salud o quedarse en casa
-
 
   // Método asincrónico para procesar la señal
   Future<void> _processSignal(List<double> totalData, Duration duration) async {
@@ -69,12 +82,117 @@ class _ReportState extends State<Report> {
     });
   }
 
+  String formatTime(int totalSeconds) {
+    final int hours = totalSeconds ~/ 3600;
+    final int minutes = (totalSeconds % 3600) ~/ 60;
+    final int seconds = totalSeconds % 60;
+
+    String result = '';
+
+    if (hours > 0) {
+      result += '${hours.toString()} hour${hours > 1 ? 's' : ''} ';
+    }
+
+    if (minutes > 0) {
+      result += '${minutes.toString()} minute${minutes > 1 ? 's' : ''} ';
+    }
+
+    if (seconds > 0 || result.isEmpty) {
+      result += '${seconds.toString()} second${seconds > 1 ? 's' : ''}';
+    }
+
+    return result.trim();
+  }
+
+
   void updateReportItems(value) {
     actualUser.reportsName.add(value);
   }
 
+  String _formatTime(Duration time) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+
+    final String hours = twoDigits(time.inHours.remainder(24));
+    final String minutes = twoDigits(time.inMinutes.remainder(60));
+    final String seconds = twoDigits(time.inSeconds.remainder(60));
+
+    return '$hours:$minutes:$seconds';
+  }
+
+
+
   // PDF generation function
   Future<void> _createPDF() async {
+
+
+    // BORRARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
+
+    List<RecordObject> records = [
+      RecordObject(
+        start: Duration(hours: 10, minutes: 0),
+        end: Duration(hours: 10, minutes: 30),
+        duration: Duration(hours: 1, minutes: 30),
+        intensity: 5,
+      ),
+      RecordObject(
+        start: Duration(hours: 9, minutes: 0),
+        end: Duration(hours: 9, minutes: 20),
+        duration: Duration(minutes: 20),
+        intensity: 3,
+      ),
+      RecordObject(
+        start: Duration(hours: 14, minutes: 0),
+        end: Duration(hours: 15, minutes: 0),
+        duration: Duration(hours: 1),
+        intensity: 7,
+      ),
+      RecordObject(
+        start: Duration(hours: 8, minutes: 0),
+        end: Duration(hours: 8, minutes: 10),
+        duration: Duration(minutes: 10),
+        intensity: 2,
+      ),
+      RecordObject(
+        start: Duration(hours: 11, minutes: 30),
+        end: Duration(hours: 12, minutes: 30),
+        duration: Duration(hours: 1),
+        intensity: 8,
+      ),
+      RecordObject(
+        start: Duration(hours: 16, minutes: 0),
+        end: Duration(hours: 16, minutes: 45),
+        duration: Duration(minutes: 45),
+        intensity: 6,
+      ),
+      RecordObject(
+        start: Duration(hours: 13, minutes: 0),
+        end: Duration(hours: 14, minutes: 0),
+        duration: Duration(hours: 1),
+        intensity: 9,
+      ),
+      RecordObject(
+        start: Duration(hours: 9, minutes: 30),
+        end: Duration(hours: 10, minutes: 0),
+        duration: Duration(minutes: 30),
+        intensity: 4,
+      ),
+      RecordObject(
+        start: Duration(hours: 12, minutes: 0),
+        end: Duration(hours: 12, minutes: 45),
+        duration: Duration(minutes: 45),
+        intensity: 7,
+      ),
+      RecordObject(
+        start: Duration(hours: 15, minutes: 0),
+        end: Duration(hours: 15, minutes: 15),
+        duration: Duration(minutes: 15),
+        intensity: 5,
+      ),
+    ];
+
+    // FIN BORRAR
+
+
     PdfDocument document = PdfDocument();
 
     final page1 = document.pages.add();
@@ -110,8 +228,8 @@ class _ReportState extends State<Report> {
     const double yTitle = 130.0;
 
     // Subtitles
-    const String subtitle1 = 'Contractions information';
-    const String subtitle2 = 'Measurement information';
+    const String subtitle1 = 'Report summary';
+    const String subtitle2 = 'Contractions details';
 
     final PdfFont fontSubtitle =
         PdfStandardFont(font, 12, style: PdfFontStyle.bold);
@@ -125,32 +243,59 @@ class _ReportState extends State<Report> {
     gridContractions.columns.add(count: 1);
 
     PdfGridRow rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Duration: $durationValue' 'seconds';
-
-    rowC = gridContractions.rows.add();
     rowC.cells[0].value =
-        'Number of contractions in the last 10 minutes: $frequencyValue';
-
-    rowC = gridContractions.rows.add();
-    rowC.cells[0].value = 'Intensity: $intensityValue mV';
+    'Number of contractions in the last 10 minutes: $frequencyValue';
 
     rowC = gridContractions.rows.add();
     rowC.cells[0].value = 'Total number of contractions: $numContractions';
 
+    rowC = gridContractions.rows.add();
+    rowC.cells[0].value = 'Average intensity: $intensityValue mV';
+
+    rowC = gridContractions.rows.add();
+    rowC.cells[0].value = 'Average duration: $durationValue seconds';
+
     transparentBorders(gridContractions);
 
+
+
     //Measurement grid
-    PdfGrid gridMeasure = PdfGrid();
-    gridMeasure.style = PdfGridStyle(
+    PdfGrid gridMeasurements = PdfGrid();
+    gridMeasurements.style = PdfGridStyle(
         font: PdfStandardFont(font, 10),
         cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
 
-    gridMeasure.columns.add(count: 1);
+    // gridMeasure.columns.add(count: 1);
+    //
+    // PdfGridRow rowM = gridMeasure.rows.add();
+    // rowM.cells[0].value = 'Recording duration: ${formatTime(lastSecond)}';
 
-    PdfGridRow rowM = gridMeasure.rows.add();
-    rowM.cells[0].value = 'Recording duration: $measurementDuration';
+    // Agregar columnas
+    gridMeasurements.columns.add(count: 5);
 
-    transparentBorders(gridMeasure);
+    // Agregar encabezados de columna
+    gridMeasurements.headers.add(1);
+    gridMeasurements.headers[0].cells[0].value = 'Index'; // Nuevo encabezado
+    gridMeasurements.headers[0].cells[1].value = 'Start';
+    gridMeasurements.headers[0].cells[2].value = 'End';
+    gridMeasurements.headers[0].cells[3].value = 'Duration';
+    gridMeasurements.headers[0].cells[4].value = 'Intensity (mA)';
+
+    // Agregar registros
+    for (int i = 0; i < records.length; i++) {
+      final RecordObject record = records[i];
+      final PdfGridRow row = gridMeasurements.rows.add();
+
+      // Aquí debes ajustar cómo se obtienen los valores de los registros
+
+      row.cells[0].value = (i + 1).toString(); // Índice comienza desde 1
+      row.cells[1].value = _formatTime(record.start);
+      row.cells[2].value = _formatTime(record.end);
+      row.cells[3].value = _formatTime(record.duration);
+      row.cells[4].value = record.intensity.toString();
+    }
+
+    transparentBorders(gridMeasurements);
 
     // PDF Layout
 
@@ -225,10 +370,17 @@ class _ReportState extends State<Report> {
     page1.graphics.drawString(subtitle2, fontSubtitle,
         bounds: Rect.fromLTWH(10, 280, 0, 0));
 
-    gridMeasure.draw(page: page1, bounds: const Rect.fromLTWH(10, 300, 0, 0));
+    // Recording duration text
+    page1.graphics.drawString(
+      'Recording duration: ${formatTime(lastSecond)}',
+      PdfStandardFont(font, 10),
+      bounds: const Rect.fromLTWH(10, 300, 0, 0),
+    );
 
-    page1.graphics.drawImage(PdfBitmap(await _readImageData('emg_signal.png')),
-        Rect.fromLTWH(0, 320, pageSize.width, 110));
+    gridMeasurements.draw(page: page1, bounds: const Rect.fromLTWH(10, 340, 0, 0));
+
+    //page1.graphics.drawImage(PdfBitmap(await _readImageData('emg_signal.png')),
+    //    Rect.fromLTWH(0, 320, pageSize.width, 110));
 
     List<int> bytes = await document.save();
     document.dispose();
@@ -250,6 +402,7 @@ class _ReportState extends State<Report> {
 
     saveAndLaunchFile(bytes, pdfFileName);
   }
+
 
   Future<Uint8List> _readImageData(String name) async {
     final data = await rootBundle.load('assets/report/figures/$name');
@@ -307,6 +460,16 @@ class _ReportState extends State<Report> {
     }
   }
 
+  String updateSuggestion(String contractions){
+    if (contractions == '-'){
+      return 'waiting';
+    } else  if (int.parse(contractions) >= 3 ){
+      return 'hospital';
+    } else {
+      return 'home';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -314,12 +477,11 @@ class _ReportState extends State<Report> {
     // Accede al TimerProvider usando Provider
     final timerProvider = Provider.of<TimerProvider>(context, listen: false);
     bool _hasProcessed = false; // Variable para rastrear si ya has procesado el intervalo de  10 segundos
-    int lastSecond = 0;
+
+    final Duration duration = timerProvider.value;
 
     // Escucha los cambios en el temporizador
     timerProvider.addListener(() {
-      final Duration duration = timerProvider.value;
-
       if (mounted) {
         if (duration.inSeconds >= 120 &&
             !_hasProcessed) { //para la primera vez que abris la tab
@@ -344,6 +506,14 @@ class _ReportState extends State<Report> {
         }
       }
     });
+
+    if (downloadButton && (duration.inSeconds != lastSecond)){
+      _processSignal(totalData, duration);
+      lastSecond = duration.inSeconds;
+      lastUpdate = DateFormat('hh:mm a').format(DateTime.now());
+      print(
+          'ULTIMOooooooooo REPORTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT!!!!!-----------------------------');
+    }
   }
 
   Widget build(BuildContext context) {
@@ -568,7 +738,7 @@ class _ReportState extends State<Report> {
                       Container(
                       width: double.infinity, // Asegura que el contenedor ocupe todo el ancho
                         height: 1.5,
-                        color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
+                        color: updateSuggestion(frequencyValue) == 'hospital' ? Color(0xFF4A2574) : updateSuggestion(frequencyValue) == 'home' ? Color(0xFFc8df59) : Colors.grey[350], // Cambia el color según el valor de la variable booleana
                       ),
 
                       const SizedBox(height: 20.0),
@@ -576,17 +746,19 @@ class _ReportState extends State<Report> {
                       Text(
                         'Suggestion:',
                         style: TextStyle(
-                          color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
+                          color: updateSuggestion(frequencyValue) == 'hospital' ? Color(0xFF4A2574) : updateSuggestion(frequencyValue) == 'home' ? Color(0xFFc8df59) : Colors.grey[350], // Cambia el color según el valor de la variable booleana
                           letterSpacing: 1.5,
                           fontStyle: FontStyle.italic,
                           fontSize: 12.0,
                         ),
                       ),
 
+                      const SizedBox(height: 5.0),
+
                       Text(
-                        shouldAttendHealthcareCenter ? 'ATTEND HEALTHCARE CENTER' : 'STAY AT HOME', // Cambia el texto según el valor de la variable booleana
+                        updateSuggestion(frequencyValue) == 'hospital' ? 'ATTEND HEALTHCARE CENTER' : updateSuggestion(frequencyValue) == 'home' ? 'STAY AT HOME' : '-', // Cambia el color según el valor de la variable booleana
                         style: TextStyle(
-                          color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
+                          color: updateSuggestion(frequencyValue) == 'hospital' ? Color(0xFF4A2574) : updateSuggestion(frequencyValue) == 'home' ? Color(0xFFc8df59) : Colors.grey[350], // Cambia el color según el valor de la variable booleana
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
                           fontSize: 20.0,
@@ -598,7 +770,7 @@ class _ReportState extends State<Report> {
                       Container(
                         width: double.infinity, // Asegura que el contenedor ocupe todo el ancho
                         height: 1.5,
-                        color: shouldAttendHealthcareCenter ? Color(0xFF4A2574) : Color(0xFFc8df59), // Cambia el color según el valor de la variable booleana
+                        color: updateSuggestion(frequencyValue) == 'hospital' ? Color(0xFF4A2574) : updateSuggestion(frequencyValue) == 'home' ? Color(0xFFc8df59) : Colors.grey[350], // Cambia el color según el valor de la variable booleana
                       ),
 
 

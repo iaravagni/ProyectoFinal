@@ -621,7 +621,6 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                 child: Icon(Icons.stop_rounded, size: 40.0, color: stopButton ? Colors.white : null),
                                 onPressed: (stopButton == true) ? () async {
                                   timerProvider.stop();
-
                                   await _stopRecording();
                                   await saveCSVFile(totalData, painLevel, timerProvider.formatTime());
                                   newRecButton = true;
@@ -629,8 +628,6 @@ class _Record extends State<Record> with AutomaticKeepAliveClientMixin {
                                   //newRecButton = true;
                                   startButton = false;
                                   downloadButton = true;
-
-                                  //initState();
                                   setState(() {});
                                 } : null,
                               ),
