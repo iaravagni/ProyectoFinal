@@ -16,6 +16,18 @@ class ReportParam {
   double frequency = 0;
 }
 
+class RecordObject {
+  final Duration peak;
+  final Duration duration;
+  final double intensity;
+
+  RecordObject({
+    required this.peak,
+    required this.duration,
+    required this.intensity,
+  });
+}
+
 List<double> totalDataEmg1 = [];
 List<double> totalDataEmg2 = [];
 int lastSampleIndex = 0; // Me quedo con la ultima muestra que procese
@@ -24,8 +36,10 @@ List<dynamic> totalPeaks = [];
 List<dynamic> totalPeaksWidths = [];
 List<dynamic> totalPeaksIntensity = [];
 
-Future<ReportParam> SignalProcessing(
-    List<double> measuredData, Duration duration) async {
+List<RecordObject> contractionsDetails = [];
+
+Future<ReportParam> SignalProcessing(List<double> measuredData, Duration duration) async {
+  print('procesandoooooUUUUU');
   List<List<dynamic>> data = [];
   // data = await loadCSV();
   // List<double> emg2 = data.map((row) => row[2]).cast<double>().toList();
@@ -106,8 +120,16 @@ Future<ReportParam> SignalProcessing(
       // Agregar el elemento actual si la lista filtrada está vacía o si el elemento actual está más lejos de 200 (5s) unidades del último elemento en la lista filtrada
       int currentPeakIndex = output[0][i] + (lastSampleIndex == 0 ? lastSampleIndex : lastSampleIndex - overlapping);
       totalPeaks.add(currentPeakIndex);
-      totalPeaksWidths.add(output[1].width[i]);
+      totalPeaksWidths.add(output[1].widths[i]);
       totalPeaksIntensity.add(totalDataEmg1[currentPeakIndex]);
+
+      contractionsDetails.add(
+        RecordObject(
+          peak: Duration(seconds: (currentPeakIndex/frequency).toInt()),
+          duration: Duration(seconds: output[1].widths[i]),
+          intensity: double.parse(totalDataEmg1[currentPeakIndex].toStringAsFixed(2)),
+      ));
+
     }
   }
 
@@ -136,22 +158,27 @@ Future<ReportParam> SignalProcessing(
   if (totalPeaksIntensity.length > 0) {
     avgIntensity = (((totalPeaksIntensity).reduce((a, b) =>
     a + b) / // calcula la duracion promedio de las contracciones
-        totalPeaksIntensity.length))
-        .round();
-    avgIntensity = (avgIntensity / (201 * 33.8)) * 1000; //intensidad a mA
+        totalPeaksIntensity.length));
+        // .round();
+    avgIntensity = (avgIntensity / (201 * 33.8)) * 1000; //intensidad a mV
   }
 
   // //------- # contracciones en los ultimos 10'--------
 
   List<dynamic> outputLast10 = [];
+  int startIndexLast10 = ((duration.inSeconds - (10 * 60)) * frequency).toInt();
 
   // // Calcular el tiempo de inicio de los últimos 10 minutos
-  if (duration.inSeconds >= 10*60) {
-    int startIndex = ((duration.inSeconds - (10 * 60)) * frequency).toInt();
-    List<double> windowDataEmg1Last10 = totalDataEmg1.sublist(startIndex);
-    outputLast10 =
-    await procesarEMG(data, windowDataEmg1Last10, Duration( seconds: 10*60));
-  }
+  // if (duration.inSeconds >= 10*60) {
+  //   List<double> windowDataEmg1Last10 = totalDataEmg1.sublist(startIndex);
+  //   outputLast10 =
+  //   await procesarEMG(data, windowDataEmg1Last10, Duration( seconds: 10*60));
+  // }
+  // else {
+  //   outputLast10 = totalPeaks;
+  // }
+
+  outputLast10 = totalPeaks.where((pico) => pico > startIndexLast10).toList();
 
   // // Filtrar los picos que ocurrieron en los últimos 10 minutos de la señal
   // List<int> filteredPeaks = [];
@@ -436,10 +463,8 @@ Future<void> saveCSVFile(List<double> csvData) async {
 }
 
 void totalDataSplit (data) {
-  print('holasss');
   for (int i = 0; i < data.length -1; i += 2) {
     totalDataEmg1.add(data[i]);
     totalDataEmg2.add(data[i+1]);
   }
-  print('holasss');
 }

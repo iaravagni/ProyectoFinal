@@ -25,19 +25,6 @@ String lastUpdate = '-';
 
 int lastSecond = 0;
 
-class RecordObject {
-  final Duration start;
-  final Duration end;
-  final Duration duration;
-  final int intensity;
-
-  RecordObject({
-    required this.start,
-    required this.end,
-    required this.duration,
-    required this.intensity,
-  });
-}
 
 class Report extends StatefulWidget {
   @override
@@ -64,9 +51,8 @@ class _ReportState extends State<Report> {
     setState(() {
       durationValue = '${report.duration}';
       numContractions = '${report.number}';
-      // frequencyValue = '${report.frequency}';
       frequencyValue = '${report.last10}';
-      intensityValue = '${report.intensity.toStringAsFixed(2)}';
+      intensityValue = report.intensity.toStringAsFixed(2);
     });
   }
 
@@ -127,68 +113,68 @@ class _ReportState extends State<Report> {
 
     // BORRARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 
-    List<RecordObject> records = [
-      RecordObject(
-        start: Duration(hours: 10, minutes: 0),
-        end: Duration(hours: 10, minutes: 30),
-        duration: Duration(hours: 1, minutes: 30),
-        intensity: 5,
-      ),
-      RecordObject(
-        start: Duration(hours: 9, minutes: 0),
-        end: Duration(hours: 9, minutes: 20),
-        duration: Duration(minutes: 20),
-        intensity: 3,
-      ),
-      RecordObject(
-        start: Duration(hours: 14, minutes: 0),
-        end: Duration(hours: 15, minutes: 0),
-        duration: Duration(hours: 1),
-        intensity: 7,
-      ),
-      RecordObject(
-        start: Duration(hours: 8, minutes: 0),
-        end: Duration(hours: 8, minutes: 10),
-        duration: Duration(minutes: 10),
-        intensity: 2,
-      ),
-      RecordObject(
-        start: Duration(hours: 11, minutes: 30),
-        end: Duration(hours: 12, minutes: 30),
-        duration: Duration(hours: 1),
-        intensity: 8,
-      ),
-      RecordObject(
-        start: Duration(hours: 16, minutes: 0),
-        end: Duration(hours: 16, minutes: 45),
-        duration: Duration(minutes: 45),
-        intensity: 6,
-      ),
-      RecordObject(
-        start: Duration(hours: 13, minutes: 0),
-        end: Duration(hours: 14, minutes: 0),
-        duration: Duration(hours: 1),
-        intensity: 9,
-      ),
-      RecordObject(
-        start: Duration(hours: 9, minutes: 30),
-        end: Duration(hours: 10, minutes: 0),
-        duration: Duration(minutes: 30),
-        intensity: 4,
-      ),
-      RecordObject(
-        start: Duration(hours: 12, minutes: 0),
-        end: Duration(hours: 12, minutes: 45),
-        duration: Duration(minutes: 45),
-        intensity: 7,
-      ),
-      RecordObject(
-        start: Duration(hours: 15, minutes: 0),
-        end: Duration(hours: 15, minutes: 15),
-        duration: Duration(minutes: 15),
-        intensity: 5,
-      ),
-    ];
+    // List<RecordObject> records = [
+    //   RecordObject(
+    //     start: Duration(hours: 10, minutes: 0),
+    //     end: Duration(hours: 10, minutes: 30),
+    //     duration: Duration(hours: 1, minutes: 30),
+    //     intensity: 5,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 9, minutes: 0),
+    //     end: Duration(hours: 9, minutes: 20),
+    //     duration: Duration(minutes: 20),
+    //     intensity: 3,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 14, minutes: 0),
+    //     end: Duration(hours: 15, minutes: 0),
+    //     duration: Duration(hours: 1),
+    //     intensity: 7,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 8, minutes: 0),
+    //     end: Duration(hours: 8, minutes: 10),
+    //     duration: Duration(minutes: 10),
+    //     intensity: 2,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 11, minutes: 30),
+    //     end: Duration(hours: 12, minutes: 30),
+    //     duration: Duration(hours: 1),
+    //     intensity: 8,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 16, minutes: 0),
+    //     end: Duration(hours: 16, minutes: 45),
+    //     duration: Duration(minutes: 45),
+    //     intensity: 6,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 13, minutes: 0),
+    //     end: Duration(hours: 14, minutes: 0),
+    //     duration: Duration(hours: 1),
+    //     intensity: 9,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 9, minutes: 30),
+    //     end: Duration(hours: 10, minutes: 0),
+    //     duration: Duration(minutes: 30),
+    //     intensity: 4,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 12, minutes: 0),
+    //     end: Duration(hours: 12, minutes: 45),
+    //     duration: Duration(minutes: 45),
+    //     intensity: 7,
+    //   ),
+    //   RecordObject(
+    //     start: Duration(hours: 15, minutes: 0),
+    //     end: Duration(hours: 15, minutes: 15),
+    //     duration: Duration(minutes: 15),
+    //     intensity: 5,
+    //   ),
+    // ];
 
     // FIN BORRAR
 
@@ -271,28 +257,26 @@ class _ReportState extends State<Report> {
     // rowM.cells[0].value = 'Recording duration: ${formatTime(lastSecond)}';
 
     // Agregar columnas
-    gridMeasurements.columns.add(count: 5);
+    gridMeasurements.columns.add(count: 4);
 
     // Agregar encabezados de columna
     gridMeasurements.headers.add(1);
     gridMeasurements.headers[0].cells[0].value = 'Index'; // Nuevo encabezado
-    gridMeasurements.headers[0].cells[1].value = 'Start';
-    gridMeasurements.headers[0].cells[2].value = 'End';
-    gridMeasurements.headers[0].cells[3].value = 'Duration';
-    gridMeasurements.headers[0].cells[4].value = 'Intensity (mA)';
+    gridMeasurements.headers[0].cells[1].value = 'Time';
+    gridMeasurements.headers[0].cells[2].value = 'Duration';
+    gridMeasurements.headers[0].cells[3].value = 'Intensity (mV)';
 
     // Agregar registros
-    for (int i = 0; i < records.length; i++) {
-      final RecordObject record = records[i];
+    for (int i = 0; i < contractionsDetails.length; i++) {
+      final RecordObject record = contractionsDetails[i];
       final PdfGridRow row = gridMeasurements.rows.add();
 
       // Aquí debes ajustar cómo se obtienen los valores de los registros
 
       row.cells[0].value = (i + 1).toString(); // Índice comienza desde 1
-      row.cells[1].value = _formatTime(record.start);
-      row.cells[2].value = _formatTime(record.end);
-      row.cells[3].value = _formatTime(record.duration);
-      row.cells[4].value = record.intensity.toString();
+      row.cells[1].value = _formatTime(record.peak);
+      row.cells[2].value = _formatTime(record.duration);
+      row.cells[3].value = record.intensity.toString();
     }
 
     transparentBorders(gridMeasurements);
@@ -461,9 +445,16 @@ class _ReportState extends State<Report> {
   }
 
   String updateSuggestion(String contractions){
+    int freqLim = 3;
+
+    if (actualUser.numChildren != '0'){
+      freqLim = 2;
+    }
+
+
     if (contractions == '-'){
       return 'waiting';
-    } else  if (int.parse(contractions) >= 3 ){
+    } else  if (int.parse(contractions) >= freqLim ){
       return 'hospital';
     } else {
       return 'home';
@@ -478,23 +469,29 @@ class _ReportState extends State<Report> {
     final timerProvider = Provider.of<TimerProvider>(context, listen: false);
     bool _hasProcessed = false; // Variable para rastrear si ya has procesado el intervalo de  10 segundos
 
-    final Duration duration = timerProvider.value;
+
 
     // Escucha los cambios en el temporizador
     timerProvider.addListener(() {
+      final Duration duration = timerProvider.value;
+
       if (mounted) {
         if (duration.inSeconds >= 120 &&
             !_hasProcessed) { //para la primera vez que abris la tab
+        // if (duration.inSeconds >= 120 &&
+        //     lastSecond == 0) {
           _processSignal(totalData, duration);
           _hasProcessed = true;
           lastUpdate = DateFormat('hh:mm a').format(DateTime.now());
           lastSecond = duration.inSeconds;
               print(
               'INICIO REPORTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT!!!!!-----------------------------');
+          print(_hasProcessed);
         }
 
         if (duration.inSeconds % 120 == 0 && lastSecond != duration.inSeconds &&
             _hasProcessed) { //ya adentro de la tab que actualice el valor
+        // if (duration.inSeconds % 120 == 0 && lastSecond != duration.inSeconds && lastSecond > 0){ //ya adentro de la tab que actualice el valor
           _processSignal(totalData, duration);
           lastSecond = duration.inSeconds;
           lastUpdate = DateFormat('hh:mm a').format(DateTime.now());
@@ -507,12 +504,17 @@ class _ReportState extends State<Report> {
       }
     });
 
+    Duration duration = timerProvider.value;
+
     if (downloadButton && (duration.inSeconds != lastSecond)){
       _processSignal(totalData, duration);
       lastSecond = duration.inSeconds;
       lastUpdate = DateFormat('hh:mm a').format(DateTime.now());
+      // _hasProcessed = false;
+
       print(
           'ULTIMOooooooooo REPORTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT!!!!!-----------------------------');
+      print(_hasProcessed);
     }
   }
 
@@ -648,7 +650,7 @@ class _ReportState extends State<Report> {
                                     fontSize: 11.0),
                               ),
                               Text(
-                                'INTENSITY (mA)',
+                                'INTENSITY (mV)',
                                 style: TextStyle(
                                     color: Colors.grey[700],
                                     letterSpacing: 2.0,
