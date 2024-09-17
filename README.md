@@ -1,16 +1,7 @@
-# myapp
+# VAIA - Pregnancy contractions monitoring medical protype
 
-A new Flutter project.
+## Abstract
 
-## Getting Started
+Accurate monitoring of uterine contractions is crucial for effective prenatal care. In this context, telemedicine emerges as a valuable tool to facilitate access to medical care and improve the quality of life for pregnant women. In this study, a prototype of a portable uterine contraction monitoring system based on electromyographic (EMG) signals was designed, developed, and evaluated. The system includes a mobile application and a low-cost wearable device. This prototype was tested with 14 physiological signals from pregnant women, achieving 79% accuracy and 83% recall in detecting uterine contractions. It was demonstrated that combining information from two EMG channels enhances the ability to identify uterine contractions. Additionally, the suggestion system provided recommendations that were accurate and consistent with healthcare professionals' advice in all cases. The study concludes that the designed prototype can detect and characterize uterine contractions with high precision, even under adverse conditions. This study highlights a potential comprehensive telemedicine tool to improve prenatal care by providing accurate and timely information about uterine activity to both patients and medical staff.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+[Link to complete document](https://acrobat.adobe.com/link/track?uri=urn:aaid:scds:US:aecc95f8-9acd-4492-872e-aee61f8e888e)
